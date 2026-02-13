@@ -6,8 +6,8 @@ export class Question {
     id: number;
     @Column()
     questionText: string;
-    @Column()
-    options:string[];
+    @Column({ type: 'simple-array' })
+    options: string[];
     @Column()
     correctAnswer: string;
     @Column()

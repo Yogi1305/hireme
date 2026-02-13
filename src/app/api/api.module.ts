@@ -1,9 +1,49 @@
 import { Module } from '@nestjs/common';
-import { ControllerModule } from './controller/controller.module';
-import { ServiceService } from './service/service.service';
+
+import { Service } from './service/service.service';
+import { UserService } from './service/user.service';
+import { User } from 'src/db/entity/user.entity';
+import { Test } from 'src/db/entity/test.entity';
+import { Question } from 'src/db/entity/question.entity';
+import { Profile } from 'src/db/entity/profile.entity';
+import { Form } from 'src/db/entity/form.entity';
+import { Job } from 'src/db/entity/jobs.entity';
+import { Employee } from 'src/db/entity/employee.entity';
+import { Company } from 'src/db/entity/company.entity';
+import { Application } from 'src/db/entity/application.entity';
+import { UserController } from './controller/user.controller';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 
 @Module({
-  imports: [ControllerModule],
-  providers: [ServiceService]
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: process.env.DATABASE_URL, // Use DATABASE_URL
+      ssl: { rejectUnauthorized: false }, // Required for Supabase
+      autoLoadEntities: true,
+      synchronize: true, // dev only
+      logging: true,
+      entities: [User,Profile,], // Ensure User entity is included
+    })
+    ,
+    TypeOrmModule.forFeature([
+      User,
+      Test,
+      Question,
+      Profile,
+      Form,
+      Job,
+      Employee,
+      Company,
+      Application
+    ])
+  ],
+  controllers: [UserController],
+  providers: [Service, UserService]
 })
 export class ApiModule {}

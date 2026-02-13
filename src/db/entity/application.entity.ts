@@ -5,7 +5,7 @@ import { Form } from "./form.entity";
 
 @Entity({ name: 'applications' })
 export class Application {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
   @ManyToOne(() => User, (user) => user.id, { nullable: false })
@@ -20,18 +20,18 @@ export class Application {
   @JoinColumn({ name: 'formId' })
   form: Form;
 
-  @Column({ default: 'pending' })
+  @Column({ name: 'status', default: 'pending' })
   status: string;
 
-  @Column()
+  @Column({ name: 'correctedanswers' })
   correctedanswers: number;
 
-  @Column()
+  @Column({ name: 'totalquestions' })
   totalquestions: number;
 
-  @Column()
+  @Column({ name: 'createdAt' })
   createdAt: Date;
 
-  @Column()
+  @Column({ name: 'updatedAt' })
   updatedAt: Date;
 }

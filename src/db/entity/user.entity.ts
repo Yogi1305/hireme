@@ -4,20 +4,20 @@ import { Profile } from "./profile.entity";
 
 @Entity({name: 'users'})
 export class User {
-  @Column({primary: true, generated: true})
+  @Column({ name: 'id', primary: true, generated: true })
   id: number;
-  @Column()
+  @Column({ name: 'name', nullable: false, default: 'Unknown' })
   name: string;
-  @Column()
+  @Column({ name: 'email', nullable: false })
   email: string;
-  @Column()
+  @Column({ name: 'password', nullable: false })
   password: string;
-  @Column({type: 'enum', enum:Role})
+  @Column({ name: 'role', type: 'enum', enum: Role, default: 'user' })
   role: string;
 
-  @Column()
+  @Column({ name: 'createdAt' })
   createdAt: Date;
-  @Column()
+  @Column({ name: 'updatedAt' })
   updatedAt: Date;
 
   @OneToOne(() => Profile, (profile) => profile.user, { cascade: true, nullable: true })

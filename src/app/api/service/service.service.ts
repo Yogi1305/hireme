@@ -1,4 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class ServiceService {}
+export class Service {
+
+    test(){
+        return `Hello World service ${process.env.DB_HOST}`;
+    }
+}

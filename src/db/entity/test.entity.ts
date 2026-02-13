@@ -12,7 +12,7 @@ export class Test {
   @Column()
   description: string;
 
-  @OneToOne(() => Job, (job) => job.test, { cascade: true })
+  @OneToOne(() => Job, (job) => job.test, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'jobId' })
   job: Job;
 
