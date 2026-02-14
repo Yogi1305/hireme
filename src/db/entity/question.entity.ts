@@ -3,8 +3,8 @@ import { BaseTimestampEntity } from './base.entity';
 
 @Entity ({ name: 'questions' })
 export class Question extends BaseTimestampEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
     @Column()
     questionText: string;
     @Column({ type: 'simple-array' })

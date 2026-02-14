@@ -7,7 +7,7 @@ export class QuestionMigration implements MigrationInterface {
 			new Table({
 				name: "questions",
 				columns: [
-					{ name: "id", type: "int", isPrimary: true, isGenerated: true, generationStrategy: "increment" },
+					{ name: "id", type: "uuid", isPrimary: true, generationStrategy: "uuid", default: "uuid_generate_v4()" },
 					{ name: "questionText", type: "varchar" },
 					{ name: "options", type: "simple-array" },
 					{ name: "correctAnswer", type: "varchar" },

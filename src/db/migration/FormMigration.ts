@@ -7,9 +7,9 @@ export class FormMigration implements MigrationInterface {
 			new Table({
 				name: "form",
 				columns: [
-					{ name: "id", type: "int", isPrimary: true, isGenerated: true, generationStrategy: "increment" },
+					{ name: "id", type: "uuid", isPrimary: true, generationStrategy: "uuid", default: "uuid_generate_v4()" },
 					{ name: "form", type: "json" },
-					{ name: "jobId", type: "int" },
+					{ name: "jobId", type: "uuid" },
 					{ name: "createdAt", type: "timestamp" },
 					{ name: "updatedAt", type: "timestamp" },
 				],

@@ -7,10 +7,10 @@ export class TestMigration implements MigrationInterface {
 			new Table({
 				name: "tests",
 				columns: [
-					{ name: "id", type: "int", isPrimary: true, isGenerated: true, generationStrategy: "increment" },
+					{ name: "id", type: "uuid", isPrimary: true, generationStrategy: "uuid", default: "uuid_generate_v4()" },
 					{ name: "title", type: "varchar" },
 					{ name: "description", type: "varchar" },
-					{ name: "jobId", type: "int" },
+					{ name: "jobId", type: "uuid" },
 					{ name: "questionSet", type: "simple-array", default: "''" },
 					{ name: "createdAt", type: "timestamp" },
 					{ name: "updatedAt", type: "timestamp" },

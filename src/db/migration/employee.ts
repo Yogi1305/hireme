@@ -8,10 +8,10 @@ export class EmployeeMigration implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'int',
+            type: 'uuid',
             isPrimary: true,
-            isGenerated: true,
-            generationStrategy: 'increment',
+            generationStrategy: 'uuid',
+            default: 'uuid_generate_v4()',
           },
           {
             name: 'name',
@@ -46,7 +46,7 @@ export class EmployeeMigration implements MigrationInterface {
           },
           {
             name: 'companyId',
-            type: 'int',
+            type: 'uuid',
             isNullable: true,
           },
           {

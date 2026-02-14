@@ -7,8 +7,8 @@ import { BaseTimestampEntity } from './base.entity';
 
 @Entity({ name: 'jobs' })
 export class Job extends BaseTimestampEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   title: string;

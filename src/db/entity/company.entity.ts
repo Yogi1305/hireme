@@ -11,8 +11,8 @@ import { Employee } from './employee.entity';
 
 @Entity({ name: 'companies' })
 export class Company extends BaseTimestampEntity {
-  @PrimaryGeneratedColumn({ name: 'id' })
-  id: number;
+  @PrimaryGeneratedColumn('uuid', { name: 'id' })
+  id: string;
 
   @Column({ name: 'companyName', type: 'varchar', length: 255, nullable: false })
   companyName: string;

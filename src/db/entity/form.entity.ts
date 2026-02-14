@@ -4,8 +4,8 @@ import { BaseTimestampEntity } from './base.entity';
 
 @Entity({ name: 'form' })
 export class Form extends BaseTimestampEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column("json")
   form: object;

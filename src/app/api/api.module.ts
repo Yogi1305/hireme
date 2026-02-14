@@ -14,6 +14,8 @@ import { Application } from 'src/db/entity/application.entity';
 import { UserController } from './controller/user.controller';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtAuthGuard } from '../guard/jwt.auth';
 
 
 @Module({
@@ -27,7 +29,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       ssl: { rejectUnauthorized: false }, // Required for Supabase
       autoLoadEntities: true,
       synchronize: true, // dev only
-      logging: true,
+      // logging: true,
       entities: [User,Profile,], // Ensure User entity is included
     })
     ,
@@ -41,9 +43,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       Employee,
       Company,
       Application
-    ])
+    ]),
+    JwtModule.register({
+          secret: process.env.JWT_SECRET || 'your_jwt_secret',
+          signOptions: { expiresIn: '1d' },
+        }),
+        
   ],
   controllers: [UserController],
-  providers: [Service, UserService]
+  providers: [Service, UserService, JwtAuthGuard],
+  exports: [JwtModule, JwtAuthGuard],
 })
 export class ApiModule {}

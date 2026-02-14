@@ -7,10 +7,10 @@ export class ApplicationMigration implements MigrationInterface {
 			new Table({
 				name: "applications",
 				columns: [
-					   { name: "id", type: "int", isPrimary: true, isGenerated: true, generationStrategy: "increment" },
-					   { name: "userId", type: "int" },
-					   { name: "jobId", type: "int" },
-					   { name: "formId", type: "int" },
+					   { name: "id", type: "uuid", isPrimary: true, generationStrategy: "uuid", default: "uuid_generate_v4()" },
+					   { name: "userId", type: "uuid" },
+					   { name: "jobId", type: "uuid" },
+					   { name: "formId", type: "uuid" },
 					   { name: "status", type: "varchar", default: "'pending'" },
 					   { name: "correctedanswers", type: "int" },
 					   { name: "totalquestions", type: "int" },

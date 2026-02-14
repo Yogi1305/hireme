@@ -6,8 +6,8 @@ import { BaseTimestampEntity } from './base.entity';
 
 @Entity({ name: 'applications' })
 export class Application extends BaseTimestampEntity {
-  @PrimaryGeneratedColumn({ name: 'id' })
-  id: number;
+  @PrimaryGeneratedColumn('uuid', { name: 'id' })
+  id: string;
 
   @ManyToOne(() => User, (user) => user.id, { nullable: false })
   @JoinColumn({ name: 'userId' })

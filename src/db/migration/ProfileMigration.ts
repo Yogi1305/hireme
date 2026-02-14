@@ -8,11 +8,16 @@ export class ProfileMigration implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'int',
+            type: 'uuid',
             isPrimary: true,
-            isGenerated: true,
-            generationStrategy: 'increment',
+            generationStrategy: 'uuid',
+            default: 'uuid_generate_v4()',
           },
+                    {
+                      name: 'userId',
+                      type: 'uuid',
+                      isNullable: true,
+                    },
           {
             name: 'github',
             type: 'varchar',

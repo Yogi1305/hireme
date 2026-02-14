@@ -27,8 +27,8 @@ export interface Experience {
 
 @Entity({ name: 'profiles' })
 export class Profile extends BaseTimestampEntity {
-  @PrimaryGeneratedColumn({ name: 'id' })
-  id: number;
+  @PrimaryGeneratedColumn('uuid', { name: 'id' })
+  id: string;
 
   @Column({ name: 'github', type: 'varchar', length: 255, nullable: true })
   github: string | null;
@@ -54,7 +54,7 @@ export class Profile extends BaseTimestampEntity {
   @Column({ name: 'experiences', type: 'jsonb', nullable: true, default: '[]' })
   experiences: Experience[] | null;
 
-  @OneToOne(() => User, (user) => user.profile, { nullable: true })
+  @OneToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'userId' })
   user: User;
 

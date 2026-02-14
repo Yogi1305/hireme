@@ -8,10 +8,10 @@ export class UserMigration implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'int',
+            type: 'uuid',
             isPrimary: true,
-            isGenerated: true,
-            generationStrategy: 'increment',
+            generationStrategy: 'uuid',
+            default: 'uuid_generate_v4()',
           },
           {
             name: 'name',
@@ -56,7 +56,7 @@ export class UserMigration implements MigrationInterface {
           },
           {
             name: 'profileId',
-            type: 'int',
+            type: 'uuid',
             isNullable: true,
           },
         ],

@@ -7,12 +7,12 @@ export class JobMigration implements MigrationInterface {
 			new Table({
 				name: "jobs",
 				columns: [
-					{ name: "id", type: "int", isPrimary: true, isGenerated: true, generationStrategy: "increment" },
+					{ name: "id", type: "uuid", isPrimary: true, generationStrategy: "uuid", default: "uuid_generate_v4()" },
 					{ name: "title", type: "varchar" },
 					{ name: "description", type: "varchar" },
 					{ name: "location", type: "varchar" },
 					{ name: "salary", type: "int" },
-					{ name: "companyId", type: "int" },
+					{ name: "companyId", type: "uuid" },
 					{ name: "jobType", type: "varchar" },
 					{ name: "jobCategory", type: "varchar" },
 					{ name: "duration", type: "varchar" },
