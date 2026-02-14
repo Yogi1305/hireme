@@ -1,10 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from "typeorm";
-import { User } from "./user.entity";
-import { Job } from "./jobs.entity";
-import { Form } from "./form.entity";
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { User } from './user.entity';
+import { Job } from './jobs.entity';
+import { Form } from './form.entity';
+import { BaseTimestampEntity } from './base.entity';
 
 @Entity({ name: 'applications' })
-export class Application {
+export class Application extends BaseTimestampEntity {
   @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
@@ -29,9 +30,4 @@ export class Application {
   @Column({ name: 'totalquestions' })
   totalquestions: number;
 
-  @Column({ name: 'createdAt' })
-  createdAt: Date;
-
-  @Column({ name: 'updatedAt' })
-  updatedAt: Date;
 }

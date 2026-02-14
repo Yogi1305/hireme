@@ -1,30 +1,35 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from "typeorm";
-import { Company } from "./company.entity";
-import { Role } from "../libs/Role";
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { Company } from './company.entity';
+import { Role } from '../libs/Role';
+import { BaseTimestampEntity } from './base.entity';
 
 @Entity({ name: 'employees' })
-export class Employee {
-  @PrimaryGeneratedColumn()
+export class Employee extends BaseTimestampEntity {
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
-  @Column()
+  @Column({ name: 'name', type: 'varchar', length: 255, nullable: false })
   name: string;
-  @Column({ unique: true })
+
+  @Column({ name: 'email', type: 'varchar', length: 255, nullable: false, unique: true })
   email: string;
 
-  @Column()
+  @Column({ name: 'phone', type: 'varchar', length: 20, nullable: false })
   phone: string;
 
-  @Column({type: 'enum', enum: Role ,default: Role.USER})
-  role: string;
-  // entity relationship with company where one company can have many employees but one employee belongs to one company
-  @ManyToOne(() => Company, (company) => company.id)
+  @Column({ name: 'role', type: 'enum', enum: Role, default: Role.USER })
+  role: Role;
+
+  @Column({ name: 'companyCode', type: 'varchar', length: 6, nullable: true })
+  companyCode: string | null;
+
+  @ManyToOne(() => Company, (company) => company.employees, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'companyId' })
   company: Company;
-
-  @Column()
-  createdAt: Date;
-
-  @Column()
-  updatedAt: Date;
 }

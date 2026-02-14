@@ -1,8 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne } from "typeorm";
-import { Job } from "./jobs.entity";
+import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Job } from './jobs.entity';
+import { BaseTimestampEntity } from './base.entity';
 
 @Entity({ name: 'form' })
-export class Form {
+export class Form extends BaseTimestampEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -13,9 +14,4 @@ export class Form {
   @JoinColumn({ name: 'jobId' })
   job: Job;
 
-  @Column()
-  createdAt: Date;
-
-  @Column()
-  updatedAt: Date;
 }

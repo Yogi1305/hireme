@@ -1,34 +1,51 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { Role } from "../libs/Role";
-import { v4 as uuidv4 } from "uuid";
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
+import { BaseTimestampEntity } from './base.entity';
+import { Employee } from './employee.entity';
 
-@Entity({name: 'companies'})
-export class Company {
-   @PrimaryGeneratedColumn()
-   id: number
-   @Column()
-   CompanyName: string;
-   @Column()
-   Location: string;
-   @Column()
-   Industry: string;
-   @Column()
-   Website: string;
-   @Column()
-   Email: string;
-   @Column()
-   Phone: string
-   @Column({type: 'enum', enum: Role, default: Role.ADMIN})
-   Roles: string;
-   @Column()
-   CreatedAt: Date
-   @Column()
-   UpdatedAt: Date
-   @Column({ unique: true, length: 6 })
-   CompanyCode: string;
+@Entity({ name: 'companies' })
+export class Company extends BaseTimestampEntity {
+  @PrimaryGeneratedColumn({ name: 'id' })
+  id: number;
 
-   @BeforeInsert()
-   generateCompanyCode() {
-      this.CompanyCode = uuidv4().slice(0, 6).toUpperCase();
-   }
+  @Column({ name: 'companyName', type: 'varchar', length: 255, nullable: false })
+  companyName: string;
+
+  @Column({ name: 'email', type: 'varchar', length: 255, nullable: false, unique: true })
+  email: string;
+
+  @Column({ name: 'password', type: 'varchar', length: 255, nullable: false })
+  password: string;
+
+  @Column({ name: 'refreshToken', type: 'varchar', length: 500, nullable: true })
+  refreshToken: string | null;
+
+  @Column({ name: 'location', type: 'varchar', length: 255, nullable: false })
+  location: string;
+
+  @Column({ name: 'industry', type: 'varchar', length: 255, nullable: false })
+  industry: string;
+
+  @Column({ name: 'website', type: 'varchar', length: 255, nullable: true })
+  website: string | null;
+
+  @Column({ name: 'phone', type: 'varchar', length: 20, nullable: true })
+  phone: string | null;
+
+  @Column({ name: 'companyCode', type: 'varchar', length: 6, unique: true })
+  companyCode: string;
+
+  @OneToMany(() => Employee, (employee) => employee.company)
+  employees: Employee[];
+
+  @BeforeInsert()
+  generateCompanyCode() {
+    this.companyCode = uuidv4().slice(0, 6).toUpperCase();
+  }
 }

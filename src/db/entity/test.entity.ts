@@ -1,8 +1,9 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn, JoinColumn } from "typeorm";
-import { Job } from "./jobs.entity";
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn, JoinColumn } from 'typeorm';
+import { Job } from './jobs.entity';
+import { BaseTimestampEntity } from './base.entity';
 
 @Entity({ name: 'tests' })
-export class Test {
+export class Test extends BaseTimestampEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -19,9 +20,4 @@ export class Test {
   @Column("simple-array", { default: "" })
   questionSet: number[];
 
-  @Column()
-  createdAt: Date;
-
-  @Column()
-  updatedAt: Date;
 }

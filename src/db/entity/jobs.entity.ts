@@ -1,11 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne } from "typeorm";
-import { Company } from "./company.entity";
-import { jobcategory, jobmode } from "../libs/Role";
-import { Test } from "./test.entity";
-import { Form } from "./form.entity";
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
+import { Company } from './company.entity';
+import { jobcategory, jobmode } from '../libs/Role';
+import { Test } from './test.entity';
+import { Form } from './form.entity';
+import { BaseTimestampEntity } from './base.entity';
 
 @Entity({ name: 'jobs' })
-export class Job {
+export class Job extends BaseTimestampEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -35,12 +36,6 @@ export class Job {
   duration: string;
   @Column()
   lastDateToApply: Date;
-
-  @Column()
-  createdAt: Date;
-
-  @Column()
-  updatedAt: Date;
 
   @OneToOne(() => Test, (test) => test.job, { cascade: true })
   @JoinColumn({ name: 'testId' })

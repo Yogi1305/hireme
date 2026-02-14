@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseTimestampEntity } from './base.entity';
 
 @Entity ({ name: 'questions' })
-export class Question {
+export class Question extends BaseTimestampEntity {
     @PrimaryGeneratedColumn()
     id: number;
     @Column()
@@ -10,8 +11,4 @@ export class Question {
     options: string[];
     @Column()
     correctAnswer: string;
-    @Column()
-    createdAt: Date;
-    @Column()
-    updatedAt: Date;
 }
