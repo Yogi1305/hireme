@@ -7,6 +7,10 @@ import { Company } from 'src/db/entity/company.entity';
 import type { CreateCompanyDtoType } from 'src/app/zod/company.dto';
 import { Role } from 'src/db/libs/Role';
 import { Employee } from 'src/db/entity/employee.entity';
+import { Job } from 'src/db/entity/jobs.entity';
+import { Form } from 'src/db/entity/form.entity';
+import { Test } from 'src/db/entity/test.entity';
+import { Application } from 'src/db/entity/application.entity';
 
 @Injectable()
 export class CompanyOwnerService {
@@ -15,6 +19,18 @@ export class CompanyOwnerService {
 
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>;
+
+    @InjectRepository(Job)
+    private readonly jobRepository: Repository<Job>;
+
+    @InjectRepository(Form)
+    private readonly formRepository: Repository<Form>;
+
+    @InjectRepository(Test)
+    private readonly testRepository: Repository<Test>;
+
+    @InjectRepository(Application)
+    private readonly applicationRepository: Repository<Application>;
 
     constructor(private readonly jwtService: JwtService) {}
 
@@ -127,5 +143,65 @@ export class CompanyOwnerService {
         const safeEmployee = { ...updatedEmployee } as Partial<Employee>;
         delete safeEmployee.password;
         return safeEmployee as Omit<Employee, 'password'>;
+    }
+
+    async getAllJobsWithFormsAndTests(companyId?: string): Promise<any[]> {
+        if (!companyId) {
+            throw new UnauthorizedException('Company ID not found in token');
+        }
+
+        const jobs = await this.jobRepository
+            .createQueryBuilder('job')
+            .where('job.companyId = :companyId', { companyId })
+            .getMany();
+
+        const jobIds = jobs.map(job => job.id);
+
+        if (jobIds.length === 0) {
+            return [];
+        }
+
+        const forms = await this.formRepository
+            .createQueryBuilder('form')
+            .leftJoinAndSelect('form.job', 'job')
+            .where('job.id IN (:...jobIds)', { jobIds })
+            .getMany();
+
+        const tests = await this.testRepository
+            .createQueryBuilder('test')
+            .leftJoinAndSelect('test.job', 'job')
+            .where('job.id IN (:...jobIds)', { jobIds })
+            .getMany();
+
+        const formMap = new Map(forms.map(f => [f.job?.id, f]));
+        const testMap = new Map(tests.map(t => [t.job?.id, t]));
+
+        // Get application counts for each job
+        const applicationCounts = await this.applicationRepository
+            .createQueryBuilder('application')
+            .leftJoin('application.job', 'job')
+            .select('job.id', 'jobId')
+            .addSelect('COUNT(application.id)', 'count')
+            .addSelect('SUM(CASE WHEN application.status = :pending THEN 1 ELSE 0 END)', 'pendingCount')
+            .addSelect('SUM(CASE WHEN application.status = :accepted THEN 1 ELSE 0 END)', 'acceptedCount')
+            .addSelect('SUM(CASE WHEN application.status = :rejected THEN 1 ELSE 0 END)', 'rejectedCount')
+            .where('job.id IN (:...jobIds)', { jobIds })
+            .setParameters({ pending: 'pending', accepted: 'accepted', rejected: 'rejected' })
+            .groupBy('job.id')
+            .getRawMany();
+
+        const applicationMap = new Map(applicationCounts.map(a => [a.jobId, {
+            total: parseInt(a.count) || 0,
+            pending: parseInt(a.pendingCount) || 0,
+            accepted: parseInt(a.acceptedCount) || 0,
+            rejected: parseInt(a.rejectedCount) || 0,
+        }]));
+
+        return jobs.map(job => ({
+            ...job,
+            form: formMap.get(job.id) || null,
+            test: testMap.get(job.id) || null,
+            applications: applicationMap.get(job.id) || { total: 0, pending: 0, accepted: 0, rejected: 0 },
+        }));
     }
 }

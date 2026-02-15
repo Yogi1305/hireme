@@ -62,5 +62,12 @@ export class CompanyOwnerController {
 
         return { message: 'Employee role updated successfully', data: updatedEmployee };
     }
-   
+
+    @UseGuards(JwtAuthGuard)
+    @Get('jobs')
+    async getAllJobsWithFormsAndTests(@Req() req: Request) {
+        const companyId = (req as any).user?.companyId as string | undefined;
+        const jobs = await this.companyOwnerService.getAllJobsWithFormsAndTests(companyId);
+        return { message: 'Jobs retrieved successfully', data: jobs };
+    }
 }

@@ -21,13 +21,16 @@ export class Application extends BaseTimestampEntity {
   @JoinColumn({ name: 'formId' })
   form: Form;
 
+  @Column('json', { name: 'formResponse', nullable: true })
+  formResponse: object;
+
   @Column({ name: 'status', default: 'pending' })
   status: string;
 
-  @Column({ name: 'correctedanswers' })
-  correctedanswers: number;
+  @Column('simple-array', { name: 'correctedanswers', default: '' })
+  correctedanswers: string[];
 
-  @Column({ name: 'totalquestions' })
+  @Column({ name: 'totalquestions', default: 0 })
   totalquestions: number;
 
 }

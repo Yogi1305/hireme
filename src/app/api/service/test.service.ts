@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Test } from 'src/db/entity/test.entity';
 import { Question } from 'src/db/entity/question.entity';
 import { Job } from 'src/db/entity/jobs.entity';
+import { Company } from 'src/db/entity/company.entity';
 import { Role } from 'src/db/libs/Role';
 import type { AddQuestionToTestDtoType, CreateTestDtoType } from 'src/app/zod/test.dto';
 
@@ -18,6 +19,9 @@ export class TestService {
   @InjectRepository(Job)
   private readonly jobRepository: Repository<Job>;
 
+  @InjectRepository(Company)
+  private readonly companyRepository: Repository<Company>;
+
   async createTest(
     dto: CreateTestDtoType,
     auth: { role?: string; companyId?: string },
@@ -30,7 +34,7 @@ export class TestService {
       throw new UnauthorizedException('Company ID not found in token');
     }
 
-    if (auth.role !== Role.Interviewer) {
+    if (auth.role !== Role.Interviewer && auth.role !== Role.ADMIN) {
       throw new ForbiddenException('Only interviewer can create test');
     }
 
@@ -112,5 +116,43 @@ export class TestService {
     const updatedTest = await this.testRepository.save(test);
 
     return { test: updatedTest, question: savedQuestion };
+  }
+
+  async getTestByJobId(jobId: string, auth: { role?: string; companyId?: string }): Promise<Test> {
+    if (!auth?.companyId) {
+      throw new UnauthorizedException('Company ID not found in token');
+    }
+
+    const test = await this.testRepository
+      .createQueryBuilder('test')
+      .leftJoinAndSelect('test.job', 'job')
+      .leftJoinAndSelect('job.company', 'company')
+      .where('job.id = :jobId', { jobId })
+      .getOne();
+
+    if (!test) {
+      throw new NotFoundException('Test not found for this job');
+    }
+
+    if (test.job?.company?.id !== auth.companyId) {
+      throw new ForbiddenException('You can only view tests for your company jobs');
+    }
+
+    return test;
+  }
+
+  async getAllTests(auth: { role?: string; companyId?: string }): Promise<Test[]> {
+    if (!auth?.companyId) {
+      throw new UnauthorizedException('Company ID not found in token');
+    }
+
+    const tests = await this.testRepository
+      .createQueryBuilder('test')
+      .leftJoinAndSelect('test.job', 'job')
+      .leftJoinAndSelect('job.company', 'company')
+      .where('company.id = :companyId', { companyId: auth.companyId })
+      .getMany();
+
+    return tests;
   }
 }

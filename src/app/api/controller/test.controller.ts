@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from 'src/app/guard/jwt.auth';
 import { InterviewerCompanyGuard } from 'src/app/guard/interviewer-company.guard';
@@ -35,5 +35,16 @@ export class TestController {
 
     const result = await this.testService.addQuestionToTest(testId, body, auth);
     return { message: 'Question added successfully', data: result };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('all')
+  async getAllTests(@Req() req: Request) {
+    const auth = {
+      role: (req as any).user?.role as string | undefined,
+      companyId: (req as any).user?.companyId as string | undefined,
+    };
+    const tests = await this.testService.getAllTests(auth);
+    return { message: 'Tests retrieved successfully', data: tests };
   }
 }

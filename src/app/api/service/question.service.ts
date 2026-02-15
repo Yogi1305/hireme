@@ -33,7 +33,7 @@ export class QuestionService {
       throw new UnauthorizedException('Company ID not found in token');
     }
 
-    if (auth.role !== Role.Interviewer) {
+    if (auth.role !== Role.Interviewer && auth.role !== Role.ADMIN) {
       throw new ForbiddenException('Only interviewer can add question');
     }
 

@@ -26,7 +26,7 @@ export class FormService {
       throw new UnauthorizedException('Company ID not found in token');
     }
 
-    if (auth.role !== Role.Hr) {
+    if (auth.role !== Role.Hr && auth.role !== Role.ADMIN) {
       throw new ForbiddenException('Only HR can create form');
     }
 
@@ -55,5 +55,42 @@ export class FormService {
     });
 
     return this.formRepository.save(form);
+  }
+  async getFormByJobId(jobId: string, auth: { role?: string; companyId?: string }): Promise<Form> {
+    if (!auth?.companyId) {
+      throw new UnauthorizedException('Company ID not found in token');
+    }
+
+    const form = await this.formRepository
+      .createQueryBuilder('form')
+      .leftJoinAndSelect('form.job', 'job')
+      .leftJoinAndSelect('job.company', 'company')
+      .where('job.id = :jobId', { jobId })
+      .getOne();
+
+    if (!form) {
+      throw new NotFoundException('Form not found for this job');
+    }
+
+    if (form.job?.company?.id !== auth.companyId) {
+      throw new ForbiddenException('You can only view forms for your company jobs');
+    }
+
+    return form;
+  }
+
+  async getAllForms(auth: { role?: string; companyId?: string }): Promise<Form[]> {
+    if (!auth?.companyId) {
+      throw new UnauthorizedException('Company ID not found in token');
+    }
+
+    const forms = await this.formRepository
+      .createQueryBuilder('form')
+      .leftJoinAndSelect('form.job', 'job')
+      .leftJoinAndSelect('job.company', 'company')
+      .where('company.id = :companyId', { companyId: auth.companyId })
+      .getMany();
+
+    return forms;
   }
 }

@@ -30,6 +30,8 @@ import { TestService } from './service/test.service';
 import { InterviewerCompanyGuard } from '../guard/interviewer-company.guard';
 import { QuestionController } from './controller/question.controller';
 import { QuestionService } from './service/question.service';
+import { ApplicationController } from './controller/application.controller';
+import { ApplicationService } from './service/application.service';
 
 
 @Module({
@@ -64,8 +66,8 @@ import { QuestionService } from './service/question.service';
         }),
         
   ],
-  controllers: [UserController,CompanyOwnerController,EmployeesController, JobController, FormController, TestController, QuestionController],
-  providers: [Service, UserService, JwtAuthGuard,CompanyOwnerService,EmployeesService, JobService, HrCompanyGuard, FormService, TestService, InterviewerCompanyGuard, QuestionService],
+  controllers: [UserController,CompanyOwnerController,EmployeesController, JobController, FormController, TestController, QuestionController, ApplicationController],
+  providers: [Service, UserService, JwtAuthGuard,CompanyOwnerService,EmployeesService, JobService, HrCompanyGuard, FormService, TestService, InterviewerCompanyGuard, QuestionService, ApplicationService],
   exports: [JwtModule, JwtAuthGuard],
 })
 export class ApiModule {}

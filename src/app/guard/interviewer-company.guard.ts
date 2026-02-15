@@ -16,7 +16,7 @@ export class InterviewerCompanyGuard implements CanActivate {
       throw new UnauthorizedException('Company ID not found in token');
     }
 
-    if (authUser.role !== Role.Interviewer) {
+    if (authUser.role !== Role.Interviewer && authUser.role !== Role.ADMIN) {
       throw new ForbiddenException('Only interviewer can create test and questions');
     }
 

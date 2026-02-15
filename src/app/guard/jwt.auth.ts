@@ -37,10 +37,10 @@ export class JwtAuthGuard implements CanActivate {
 			(request as any).user = {
 				id: payload.id,
 				role: payload.role,
-				companyCode: payload.companyCode,
-				companyId: payload.companyId,
+				companyCode: payload?.companyCode,
+				companyId: payload?.companyId,
 			};
-		    console.log('Token payload:', payload);
+		    // console.log('Token payload:', payload);
 			return true;
 		} catch (err) {
 			throw new UnauthorizedException('Invalid or expired token');
