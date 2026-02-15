@@ -68,7 +68,7 @@ export class UserService {
     }
     const payload = { id: user.id, role: user.role };
     const access_token = this.jwtService.sign(payload);
-    return { access_token,user };
+    return { access_token, user };
   }
 
   // Get user by id
@@ -103,6 +103,13 @@ export class UserService {
     const profile = await this.getProfileByUserId(userId);
     if (!profile) {
       throw new NotFoundException('Profile not found');
+    }
+    if (profileData.skills) {
+      profileData.skills = profileData.skills.map(skill => skill.trim());
+    }
+    if (profileData.resumes) {
+      // upload the resumes to s3 and replace the local paths with s3 urls
+      
     }
     Object.assign(profile, profileData);
     return this.profileRepository.save(profile);

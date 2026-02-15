@@ -16,6 +16,20 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthGuard } from '../guard/jwt.auth';
+import { CompanyOwnerController } from './controller/companyowner.controller';
+import { CompanyOwnerService } from './service/companyowner.service';
+import { EmployeesController } from './controller/employees.controller';
+import { EmployeesService } from './service/employees.service';
+import { JobController } from './controller/job.controller';
+import { JobService } from './service/job.service';
+import { HrCompanyGuard } from '../guard/hr-company.guard';
+import { FormController } from './controller/form.controller';
+import { FormService } from './service/form.service';
+import { TestController } from './controller/test.controller';
+import { TestService } from './service/test.service';
+import { InterviewerCompanyGuard } from '../guard/interviewer-company.guard';
+import { QuestionController } from './controller/question.controller';
+import { QuestionService } from './service/question.service';
 
 
 @Module({
@@ -50,8 +64,8 @@ import { JwtAuthGuard } from '../guard/jwt.auth';
         }),
         
   ],
-  controllers: [UserController],
-  providers: [Service, UserService, JwtAuthGuard],
+  controllers: [UserController,CompanyOwnerController,EmployeesController, JobController, FormController, TestController, QuestionController],
+  providers: [Service, UserService, JwtAuthGuard,CompanyOwnerService,EmployeesService, JobService, HrCompanyGuard, FormService, TestService, InterviewerCompanyGuard, QuestionService],
   exports: [JwtModule, JwtAuthGuard],
 })
 export class ApiModule {}

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const QuestionDto = z.object({
-  id: z.number().optional(),
+  id: z.string().uuid().optional(),
   questionText: z.string(),
   options: z.array(z.string()),
   correctAnswer: z.string(),
@@ -10,3 +10,11 @@ export const QuestionDto = z.object({
 });
 
 export type QuestionDtoType = z.infer<typeof QuestionDto>;
+
+export const CreateQuestionDto = QuestionDto.pick({
+  questionText: true,
+  options: true,
+  correctAnswer: true,
+});
+
+export type CreateQuestionDtoType = z.infer<typeof CreateQuestionDto>;

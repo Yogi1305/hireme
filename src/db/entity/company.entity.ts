@@ -8,6 +8,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { BaseTimestampEntity } from './base.entity';
 import { Employee } from './employee.entity';
+import { Role } from '../libs/Role';
 
 @Entity({ name: 'companies' })
 export class Company extends BaseTimestampEntity {
@@ -43,6 +44,9 @@ export class Company extends BaseTimestampEntity {
 
   @OneToMany(() => Employee, (employee) => employee.company)
   employees: Employee[];
+   
+  @Column({ name: 'role', type: 'enum', enum: Role, default: Role.ADMIN })
+  role: Role;
 
   @BeforeInsert()
   generateCompanyCode() {

@@ -17,7 +17,7 @@ export class Test extends BaseTimestampEntity {
   @JoinColumn({ name: 'jobId' })
   job: Job;
 
-  @Column("simple-array", { default: "" })
-  questionSet: number[];
+  @Column('simple-array', { default: '' })
+  questionSet: string[];
 
 }

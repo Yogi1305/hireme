@@ -41,5 +41,7 @@ export class Job extends BaseTimestampEntity {
   @JoinColumn({ name: 'testId' })
   test: Test;
   @OneToOne(() => Form, (form) => form.job, { cascade: true })
+  @JoinColumn({ name: 'formId' })
   Form: Form;
+
 }

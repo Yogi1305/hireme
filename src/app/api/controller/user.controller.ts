@@ -58,7 +58,7 @@ export class UserController {
         return this.userService.getProfileByUserId(userId);
     }
     @UseGuards(JwtAuthGuard)
-    @Get("profile/update")
+    @Post("profile/update")
     async updateProfile(@Req() req: Request, @Body() profileData: Partial<Profile>) {
         const userId = (req as any).user?.id as string;
         return this.userService.updateProfile(userId, profileData);

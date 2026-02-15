@@ -1,0 +1,116 @@
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Test } from 'src/db/entity/test.entity';
+import { Question } from 'src/db/entity/question.entity';
+import { Job } from 'src/db/entity/jobs.entity';
+import { Role } from 'src/db/libs/Role';
+import type { AddQuestionToTestDtoType, CreateTestDtoType } from 'src/app/zod/test.dto';
+
+@Injectable()
+export class TestService {
+  @InjectRepository(Test)
+  private readonly testRepository: Repository<Test>;
+
+  @InjectRepository(Question)
+  private readonly questionRepository: Repository<Question>;
+
+  @InjectRepository(Job)
+  private readonly jobRepository: Repository<Job>;
+
+  async createTest(
+    dto: CreateTestDtoType,
+    auth: { role?: string; companyId?: string },
+  ): Promise<Test> {
+    if (!dto) {
+      throw new BadRequestException('Request body is required');
+    }
+
+    if (!auth?.companyId) {
+      throw new UnauthorizedException('Company ID not found in token');
+    }
+
+    if (auth.role !== Role.Interviewer) {
+      throw new ForbiddenException('Only interviewer can create test');
+    }
+
+    const job = await this.jobRepository
+      .createQueryBuilder('job')
+      .leftJoinAndSelect('job.company', 'company')
+      .leftJoinAndSelect('job.test', 'test')
+      .where('job.id = :jobId', { jobId: dto.jobId })
+      .getOne();
+
+    if (!job) {
+      throw new NotFoundException('Job not found');
+    }
+
+    if (job.company?.id !== auth.companyId) {
+      throw new ForbiddenException('You can create test only for your company jobs');
+    }
+
+    if (job.test) {
+      throw new ConflictException('Test already exists for this job');
+    }
+
+    const test = this.testRepository.create({
+      title: dto.title,
+      description: dto.description,
+      questionSet: [],
+      job,
+    });
+
+    return this.testRepository.save(test);
+  }
+
+  async addQuestionToTest(
+    testId: string,
+    dto: AddQuestionToTestDtoType,
+    auth: { role?: string; companyId?: string },
+  ): Promise<{ test: Test; question: Question }> {
+    if (!dto) {
+      throw new BadRequestException('Request body is required');
+    }
+
+    if (!auth?.companyId) {
+      throw new UnauthorizedException('Company ID not found in token');
+    }
+
+    if (auth.role !== Role.Interviewer) {
+      throw new ForbiddenException('Only interviewer can add question');
+    }
+
+    const test = await this.testRepository
+      .createQueryBuilder('test')
+      .leftJoinAndSelect('test.job', 'job')
+      .leftJoinAndSelect('job.company', 'company')
+      .where('test.id = :testId', { testId })
+      .getOne();
+
+    if (!test) {
+      throw new NotFoundException('Test not found');
+    }
+
+    if (test.job?.company?.id !== auth.companyId) {
+      throw new ForbiddenException('You can add question only to your company test');
+    }
+
+    if (!dto.options.includes(dto.correctAnswer)) {
+      throw new BadRequestException('Correct answer must be one of the options');
+    }
+
+    const question = this.questionRepository.create({
+      questionText: dto.questionText,
+      options: dto.options,
+      correctAnswer: dto.correctAnswer,
+    });
+
+    const savedQuestion = await this.questionRepository.save(question);
+
+    const questionSet = Array.isArray(test.questionSet) ? test.questionSet : [];
+    test.questionSet = [...questionSet, savedQuestion.id];
+    const updatedTest = await this.testRepository.save(test);
+
+    return { test: updatedTest, question: savedQuestion };
+  }
+}

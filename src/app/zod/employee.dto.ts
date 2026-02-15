@@ -16,9 +16,13 @@ export const CreateEmployeeDto = z.object({
     .string()
     .min(1, 'Phone is required')
     .max(20),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(255),
   role: z.enum(RoleValues).optional().default('user'),
   companyCode: z.string().length(6, 'Company code must be 6 characters').optional().nullable(),
-  companyId: z.number().int().positive().optional(),
+  companyId: z.string().uuid().optional(),
 });
 
 export type CreateEmployeeDtoType = z.infer<typeof CreateEmployeeDto>;
@@ -30,13 +34,13 @@ export type UpdateEmployeeDtoType = z.infer<typeof UpdateEmployeeDto>;
 
 /** Employee response shape (API output). */
 export const EmployeeResponseDto = z.object({
-  id: z.number(),
+  id: z.string().uuid(),
   name: z.string(),
   email: z.string().email(),
   phone: z.string(),
   role: z.enum(RoleValues),
   companyCode: z.string().nullable(),
-  companyId: z.number().nullable().optional(),
+  companyId: z.string().uuid().nullable().optional(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
