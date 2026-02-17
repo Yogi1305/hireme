@@ -22,6 +22,8 @@ export enum applicationstatus {
     APPLIED = 'applied',
     REVIEWED = 'reviewed',
     INTERVIEW_SCHEDULED = 'interview_scheduled',
+    SHORTLISTED = 'shortlisted',
+    SELECTED = 'selected',
     REJECTED = 'rejected',
     ACCEPTED = 'accepted',
 }

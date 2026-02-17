@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from 'src/app/guard/jwt.auth';
+import { HrCompanyGuard } from 'src/app/guard/hr-company.guard';
 import type { CreateApplicationDtoType } from 'src/app/zod/application.dto';
 import { ApplicationService } from '../service/application.service';
 
@@ -88,5 +89,17 @@ export class ApplicationController {
 
     const application = await this.applicationService.submitTestAnswers(applicationId, testAnswers, auth);
     return { message: 'Test submitted successfully', data: application };
+  }
+
+  /**
+   * Get all jobs with applicants for the logged-in user's company
+   * Only HR or Admin can access this endpoint
+   */
+  @UseGuards(JwtAuthGuard, HrCompanyGuard)
+  @Get('company/jobs')
+  async getJobsWithApplicantsByCompany(@Req() req: Request) {
+    const companyId = (req as any).user?.companyId as string;
+    const result = await this.applicationService.getJobsWithApplicantsByCompany(companyId);
+    return { message: 'Jobs with applicants retrieved successfully', data: result };
   }
 }

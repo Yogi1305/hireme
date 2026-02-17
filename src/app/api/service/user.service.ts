@@ -56,7 +56,7 @@ export class UserService {
   }
 
   // Login
-  async loginUser(data: { email: string; password: string }): Promise<{ access_token: string,user: User }> {
+  async loginUser(data: { email: string; password: string }): Promise<{ access_token: string, user: User, profile: Profile }> {
     const { email, password } = data;
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user) {
@@ -68,7 +68,8 @@ export class UserService {
     }
     const payload = { id: user.id, role: user.role };
     const access_token = this.jwtService.sign(payload);
-    return { access_token, user };
+    const profile = await this.getProfileByUserId(user.id);
+    return { access_token, user, profile };
   }
 
   // Get user by id

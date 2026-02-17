@@ -4,6 +4,7 @@ import type { Request } from 'express';
 import type { CreateEmployeeDtoType } from 'src/app/zod/employee.dto';
 import { EmployeesService } from '../service/employees.service';
 import { JwtAuthGuard } from 'src/app/guard/jwt.auth';
+import { HrCompanyGuard } from 'src/app/guard/hr-company.guard';
 
 @Controller('employees')
 export class EmployeesController {
@@ -38,5 +39,17 @@ export class EmployeesController {
         return { message: 'Login successful', data: result };
     }
 
+    /**
+     * Get all employees for the logged-in user's company
+     * GET /employees/company
+     * Requires HR or Admin role
+     */
+    @UseGuards(JwtAuthGuard, HrCompanyGuard)
+    @Get('company')
+    async getEmployeesByCompany(@Req() req: Request) {
+        const companyId = (req as any).user?.companyId as string;
+        const employees = await this.employeesService.getEmployeesByCompany(companyId);
+        return { message: 'Employees retrieved successfully', data: employees };
+    }
 
 }

@@ -1,12 +1,14 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Application } from 'src/db/entity/application.entity';
+import { Application, AnswerRecord } from 'src/db/entity/application.entity';
 import { Job } from 'src/db/entity/jobs.entity';
 import { Form } from 'src/db/entity/form.entity';
 import { Test } from 'src/db/entity/test.entity';
 import { Question } from 'src/db/entity/question.entity';
 import { User } from 'src/db/entity/user.entity';
+import { Company } from 'src/db/entity/company.entity';
+import { Profile } from 'src/db/entity/profile.entity';
 import type { CreateApplicationDtoType } from 'src/app/zod/application.dto';
 
 @Injectable()
@@ -28,6 +30,12 @@ export class ApplicationService {
 
   @InjectRepository(User)
   private readonly userRepository: Repository<User>;
+
+  @InjectRepository(Company)
+  private readonly companyRepository: Repository<Company>;
+
+  @InjectRepository(Profile)
+  private readonly profileRepository: Repository<Profile>;
 
   async createApplication(
     dto: CreateApplicationDtoType,
@@ -77,7 +85,10 @@ export class ApplicationService {
 
     // Get test and calculate score if test answers provided
     let correctedAnswerIds: string[] = [];
+    let incorrectAnswerIds: string[] = [];
+    let answerDetails: AnswerRecord[] = [];
     let totalQuestions = 0;
+    let testAnswered = false;
 
     if (dto.testAnswers && dto.testAnswers.length > 0) {
       const test = await this.testRepository
@@ -88,14 +99,28 @@ export class ApplicationService {
 
       if (test && test.questionSet.length > 0) {
         totalQuestions = test.questionSet.length;
+        testAnswered = true;
 
         for (const answer of dto.testAnswers) {
           const question = await this.questionRepository.findOne({
             where: { id: answer.questionId },
           });
 
-          if (question && question.correctAnswer === answer.answer) {
-            correctedAnswerIds.push(answer.questionId);
+          if (question) {
+            const isCorrect = question.correctAnswer === answer.answer;
+            
+            answerDetails.push({
+              questionId: answer.questionId,
+              userAnswer: answer.answer,
+              correctAnswer: question.correctAnswer,
+              isCorrect,
+            });
+
+            if (isCorrect) {
+              correctedAnswerIds.push(answer.questionId);
+            } else {
+              incorrectAnswerIds.push(answer.questionId);
+            }
           }
         }
       }
@@ -108,7 +133,10 @@ export class ApplicationService {
       formResponse: dto.formResponse,
       status: 'pending',
       correctedanswers: correctedAnswerIds,
+      incorrectanswers: incorrectAnswerIds,
+      answerDetails,
       totalquestions: totalQuestions,
+      testAnswered,
     });
 
     return this.applicationRepository.save(application);
@@ -292,21 +320,144 @@ export class ApplicationService {
       throw new NotFoundException('Test not found for this job');
     }
 
+    // Check if test was already answered
+    if (application.testAnswered) {
+      throw new ConflictException('You have already submitted answers for this test');
+    }
+
     const correctedAnswerIds: string[] = [];
+    const incorrectAnswerIds: string[] = [];
+    const answerDetails: AnswerRecord[] = [];
 
     for (const answer of testAnswers) {
+      // Check if this question was already answered
+      const alreadyAnswered = application.answerDetails?.some(
+        (a) => a.questionId === answer.questionId
+      );
+      if (alreadyAnswered) {
+        throw new ConflictException(`Question ${answer.questionId} has already been answered`);
+      }
+
       const question = await this.questionRepository.findOne({
         where: { id: answer.questionId },
       });
 
-      if (question && question.correctAnswer === answer.answer) {
-        correctedAnswerIds.push(answer.questionId);
+      if (question) {
+        const isCorrect = question.correctAnswer === answer.answer;
+
+        answerDetails.push({
+          questionId: answer.questionId,
+          userAnswer: answer.answer,
+          correctAnswer: question.correctAnswer,
+          isCorrect,
+        });
+
+        if (isCorrect) {
+          correctedAnswerIds.push(answer.questionId);
+        } else {
+          incorrectAnswerIds.push(answer.questionId);
+        }
       }
     }
 
     application.correctedanswers = correctedAnswerIds;
+    application.incorrectanswers = incorrectAnswerIds;
+    application.answerDetails = answerDetails;
     application.totalquestions = test.questionSet.length;
+    application.testAnswered = true;
 
     return this.applicationRepository.save(application);
+  }
+
+  /**
+   * Get all jobs with their applicants by company ID from token
+   * Only HR or Admin can access this
+   */
+  async getJobsWithApplicantsByCompany(companyId: string): Promise<{ jobs: any[] }> {
+    if (!companyId) {
+      throw new UnauthorizedException('Company ID not found in token');
+    }
+
+    const company = await this.companyRepository.findOne({ where: { id: companyId } });
+    if (!company) {
+      throw new NotFoundException('Company not found');
+    }
+
+    // Get all jobs for this company
+    const jobs = await this.jobRepository
+      .createQueryBuilder('job')
+      .leftJoinAndSelect('job.company', 'company')
+      .leftJoinAndSelect('job.test', 'test')
+      .leftJoinAndSelect('job.Form', 'form')
+      .where('company.id = :companyId', { companyId: company.id })
+      .getMany();
+
+    // Get applicants for each job
+    const jobsWithApplicants = await Promise.all(
+      jobs.map(async (job) => {
+        const applications = await this.applicationRepository
+          .createQueryBuilder('application')
+          .leftJoinAndSelect('application.user', 'user')
+          .leftJoinAndSelect('application.form', 'form')
+          .where('application.jobId = :jobId', { jobId: job.id })
+          .select([
+            'application.id',
+            'application.status',
+            'application.formResponse',
+            'application.correctedanswers',
+            'application.incorrectanswers',
+            'application.totalquestions',
+            'application.testAnswered',
+            'application.createdAt',
+            'user.id',
+            'user.name',
+            'user.email',
+          ])
+          .getMany();
+
+        // Fetch profiles for all users in this job's applications
+        const applicantsWithProfiles = await Promise.all(
+          applications.map(async (app) => {
+            let profile: Profile | null = null;
+            if (app.user?.id) {
+              profile = await this.profileRepository
+                .createQueryBuilder('profile')
+                .leftJoin('profile.user', 'user')
+                .where('user.id = :userId', { userId: app.user.id })
+                .select(['profile.github', 'profile.linkedin', 'profile.skills', 'profile.resumes'])
+                .getOne();
+            }
+
+            return {
+              applicationId: app.id,
+              status: app.status,
+              formResponse: app.formResponse,
+              testScore: app.testAnswered
+                ? `${app.correctedanswers?.length || 0}/${app.totalquestions}`
+                : 'Not taken',
+              correctAnswers: app.correctedanswers?.length || 0,
+              incorrectAnswers: app.incorrectanswers?.length || 0,
+              appliedAt: app.createdAt,
+              user: app.user
+                ? {
+                    id: app.user.id,
+                    name: app.user.name,
+                    email: app.user.email,
+                    profile,
+                  }
+                : null,
+            };
+          })
+        );
+
+        return {
+          ...job,
+          applicantCount: applications.length,
+          applicants: applicantsWithProfiles,
+        };
+      })
+    );
+
+    return { jobs: jobsWithApplicants };
   }
 }

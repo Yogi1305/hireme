@@ -98,6 +98,37 @@ export class EmployeesService {
         };
     }
 
+    /**
+     * Get all employees for the company from the JWT token
+     */
+    async getEmployeesByCompany(companyId: string): Promise<Omit<Employee, 'password'>[]> {
+        if (!companyId) {
+            throw new UnauthorizedException('Company ID not found in token');
+        }
+
+        const company = await this.companyRepository.findOne({ where: { id: companyId } });
+        if (!company) {
+            throw new NotFoundException('Company not found');
+        }
+
+        const employees = await this.employeeRepository
+            .createQueryBuilder('employee')
+            .leftJoin('employee.company', 'company')
+            .where('company.id = :companyId', { companyId })
+            .select([
+                'employee.id',
+                'employee.name',
+                'employee.email',
+                'employee.phone',
+                'employee.role',
+                'employee.companyCode',
+                'employee.createdAt',
+            ])
+            .getMany();
+
+        return employees;
+    }
+
     async getEmployeesByCompanyCode(companyCode?: string): Promise<Array<Omit<Employee, 'password'>>> {
         if (!companyCode) {
             throw new UnauthorizedException('Company code not found in token');

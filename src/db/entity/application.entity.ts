@@ -4,6 +4,14 @@ import { Job } from './jobs.entity';
 import { Form } from './form.entity';
 import { BaseTimestampEntity } from './base.entity';
 
+/** Interface for storing answer details */
+export interface AnswerRecord {
+  questionId: string;
+  userAnswer: string;
+  correctAnswer: string;
+  isCorrect: boolean;
+}
+
 @Entity({ name: 'applications' })
 export class Application extends BaseTimestampEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
@@ -30,7 +38,16 @@ export class Application extends BaseTimestampEntity {
   @Column('simple-array', { name: 'correctedanswers', default: '' })
   correctedanswers: string[];
 
+  @Column('simple-array', { name: 'incorrectanswers', default: '' })
+  incorrectanswers: string[];
+
+  @Column('jsonb', { name: 'answerDetails', nullable: true, default: '[]' })
+  answerDetails: AnswerRecord[];
+
   @Column({ name: 'totalquestions', default: 0 })
   totalquestions: number;
+
+  @Column({ name: 'testAnswered', default: false })
+  testAnswered: boolean;
 
 }
