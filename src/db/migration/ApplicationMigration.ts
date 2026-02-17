@@ -18,6 +18,7 @@ export class ApplicationMigration implements MigrationInterface {
 					   { name: "answerDetails", type: "jsonb", default: "'[]'" },
 					   { name: "totalquestions", type: "int", default: 0 },
 					   { name: "testAnswered", type: "boolean", default: false },
+					   { name: "notes", type: "text", isNullable: true },
 					   { name: "createdAt", type: "timestamp", default: "now()" },
 					   { name: "updatedAt", type: "timestamp", default: "now()" },
 				],

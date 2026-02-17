@@ -17,15 +17,15 @@ export class Application extends BaseTimestampEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id: string;
 
-  @ManyToOne(() => User, (user) => user.id, { nullable: false })
+  @ManyToOne(() => User, { nullable: false })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @ManyToOne(() => Job, (job) => job.id, { nullable: false })
+  @ManyToOne(() => Job, { nullable: false })
   @JoinColumn({ name: 'jobId' })
   job: Job;
 
-  @ManyToOne(() => Form, (form) => form.id, { nullable: false })
+  @ManyToOne(() => Form, { nullable: false })
   @JoinColumn({ name: 'formId' })
   form: Form;
 
@@ -49,5 +49,8 @@ export class Application extends BaseTimestampEntity {
 
   @Column({ name: 'testAnswered', default: false })
   testAnswered: boolean;
+
+  @Column({ name: 'notes', type: 'text', nullable: true })
+  notes: string;
 
 }

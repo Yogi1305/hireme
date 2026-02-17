@@ -25,3 +25,10 @@ export const CreateApplicationDto = z.object({
 
 export type CreateApplicationDtoType = z.infer<typeof CreateApplicationDto>;
 
+export const UpdateApplicationStatusDto = z.object({
+  status: z.string(),
+  notes: z.string().optional(),
+});
+
+export type UpdateApplicationStatusDtoType = z.infer<typeof UpdateApplicationStatusDto>;
+

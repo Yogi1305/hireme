@@ -201,6 +201,7 @@ export class ApplicationService {
   async updateApplicationStatus(
     applicationId: string,
     status: string,
+    notes: string | undefined,
     auth: { companyId?: string },
   ): Promise<Application> {
     if (!auth?.companyId) {
@@ -223,6 +224,9 @@ export class ApplicationService {
     }
 
     application.status = status;
+    if (notes !== undefined) {
+      application.notes = notes;
+    }
     return this.applicationRepository.save(application);
   }
 

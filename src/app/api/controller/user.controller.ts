@@ -69,4 +69,11 @@ export class UserController {
     getUserService() {
         return this.service.test(); ;
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Get("applications")
+    async getUserApplications(@Req() req: Request) {
+        const userId = (req as any).user?.id as string;
+        return this.userService.getUserApplications(userId);
+    }
 }

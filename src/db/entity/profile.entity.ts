@@ -54,7 +54,7 @@ export class Profile extends BaseTimestampEntity {
   @Column({ name: 'experiences', type: 'jsonb', nullable: true, default: '[]' })
   experiences: Experience[] | null;
 
-  @OneToOne(() => User, { nullable: true })
+  @OneToOne(() => User, (user) => user.profile, { nullable: true })
   @JoinColumn({ name: 'userId' })
   user: User;
 

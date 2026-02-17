@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDtoType } from 'src/app/zod/user.dto';
 import { User } from 'src/db/entity/user.entity';
 import { Profile } from 'src/db/entity/profile.entity';
+import { Application } from 'src/db/entity/application.entity';
 import { Role } from 'src/db/libs/Role';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
@@ -15,6 +16,9 @@ export class UserService {
 
   @InjectRepository(Profile)
   private readonly profileRepository: Repository<Profile>;
+
+  @InjectRepository(Application)
+  private readonly applicationRepository: Repository<Application>;
 
   constructor(private readonly jwtService: JwtService) {}
 
@@ -114,5 +118,46 @@ export class UserService {
     }
     Object.assign(profile, profileData);
     return this.profileRepository.save(profile);
+  }
+
+  // Get all applications for a user
+  async getUserApplications(userId: string): Promise<Application[]> {
+    if (!userId) {
+      throw new UnauthorizedException('Invalid user');
+    }
+
+    const applications = await this.applicationRepository
+      .createQueryBuilder('application')
+      .leftJoinAndSelect('application.job', 'job')
+      .leftJoinAndSelect('job.company', 'company')
+      .leftJoinAndSelect('application.form', 'form')
+      .leftJoin('application.user', 'user')
+      .where('user.id = :userId', { userId })
+      .select([
+        'application.id',
+        'application.status',
+        'application.formResponse',
+        'application.testAnswered',
+        'application.totalquestions',
+        'application.correctedanswers',
+        'application.incorrectanswers',
+        'application.createdAt',
+        'application.updatedAt',
+        'job.id',
+        'job.title',
+        'job.description',
+        'job.location',
+        'job.salary',
+        'job.jobType',
+        'job.jobCategory',
+        'job.lastDateToApply',
+        'company.id',
+        'company.companyName',
+        'form.id',
+      ])
+      .orderBy('application.createdAt', 'DESC')
+      .getMany();
+
+    return applications;
   }
 }

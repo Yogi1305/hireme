@@ -2,9 +2,11 @@ import {
   Column,
   Entity,
   PrimaryGeneratedColumn,
+  OneToOne,
 } from 'typeorm';
 import { Role } from '../libs/Role';
 import { BaseTimestampEntity } from './base.entity';
+import { Profile } from './profile.entity';
 
 @Entity({ name: 'users' })
 export class User extends BaseTimestampEntity {
@@ -25,4 +27,7 @@ export class User extends BaseTimestampEntity {
 
   @Column({ name: 'refreshToken', type: 'varchar', length: 500, nullable: true })
   refreshToken: string | null;
+
+  @OneToOne(() => Profile, (profile) => profile.user)
+  profile: Profile;
 }

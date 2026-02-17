@@ -66,13 +66,14 @@ export class ApplicationController {
   async updateApplicationStatus(
     @Param('applicationId') applicationId: string,
     @Body('status') status: string,
+    @Body('notes') notes: string | undefined,
     @Req() req: Request,
   ) {
     const auth = {
       companyId: (req as any).user?.companyId as string | undefined,
     };
 
-    const application = await this.applicationService.updateApplicationStatus(applicationId, status, auth);
+    const application = await this.applicationService.updateApplicationStatus(applicationId, status, notes, auth);
     return { message: 'Application status updated successfully', data: application };
   }
 
