@@ -6,6 +6,7 @@ import { User } from 'src/db/entity/user.entity';
 import { Test } from 'src/db/entity/test.entity';
 import { Question } from 'src/db/entity/question.entity';
 import { Profile } from 'src/db/entity/profile.entity';
+import { QuestionSet } from 'src/db/entity/questionset.entity';
 import { Form } from 'src/db/entity/form.entity';
 import { Job } from 'src/db/entity/jobs.entity';
 import { Employee } from 'src/db/entity/employee.entity';
@@ -32,6 +33,8 @@ import { QuestionController } from './controller/question.controller';
 import { QuestionService } from './service/question.service';
 import { ApplicationController } from './controller/application.controller';
 import { ApplicationService } from './service/application.service';
+import { QuestionSetController } from './controller/questionset.controller';
+import { QuestionSetService } from './service/questionset.service';
 import { InterviewerController } from './controller/interviewer.controller';
 import { InterviewerService } from './service/interviewer.service';
 
@@ -48,7 +51,7 @@ import { InterviewerService } from './service/interviewer.service';
       autoLoadEntities: true,
       synchronize: true, // dev only
       // logging: true,
-      entities: [User,Profile,], // Ensure User entity is included
+      entities: [User, Profile, QuestionSet], // Ensure all entities are included
     })
     ,
     TypeOrmModule.forFeature([
@@ -60,7 +63,8 @@ import { InterviewerService } from './service/interviewer.service';
       Job,
       Employee,
       Company,
-      Application
+      Application,
+      QuestionSet
     ]),
     JwtModule.register({
           secret: process.env.JWT_SECRET || 'your_jwt_secret',
@@ -68,8 +72,8 @@ import { InterviewerService } from './service/interviewer.service';
         }),
         
   ],
-  controllers: [UserController,CompanyOwnerController,EmployeesController, JobController, FormController, TestController, QuestionController, ApplicationController, InterviewerController],
-  providers: [Service, UserService, JwtAuthGuard,CompanyOwnerService,EmployeesService, JobService, HrCompanyGuard, FormService, TestService, InterviewerCompanyGuard, QuestionService, ApplicationService, InterviewerService],
+  controllers: [UserController,CompanyOwnerController,EmployeesController, JobController, FormController, TestController, QuestionController, ApplicationController, InterviewerController, QuestionSetController],
+  providers: [Service, UserService, JwtAuthGuard,CompanyOwnerService,EmployeesService, JobService, HrCompanyGuard, FormService, TestService, InterviewerCompanyGuard, QuestionService, ApplicationService, InterviewerService, QuestionSetService],
   exports: [JwtModule, JwtAuthGuard],
 })
 export class ApiModule {}

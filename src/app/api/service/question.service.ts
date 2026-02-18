@@ -60,16 +60,17 @@ export class QuestionService {
       questionText: dto.questionText,
       options: dto.options,
       correctAnswer: dto.correctAnswer,
+      test: test,
     });
 
     const savedQuestion = await this.questionRepository.save(question);
 
-    const questionSet = Array.isArray(test.questionSet)
-      ? test.questionSet.filter(Boolean)
-      : [];
-    test.questionSet = [...questionSet, savedQuestion.id];
-    const updatedTest = await this.testRepository.save(test);
+    // No need to manually update questionSet, relation is managed by ORM
+    const updatedTest = await this.testRepository.findOne({
+      where: { id: test.id },
+      relations: ['questionSet'],
+    });
 
-    return { test: updatedTest, question: savedQuestion };
+    return { test: updatedTest!, question: savedQuestion };
   }
 }

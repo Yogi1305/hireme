@@ -103,27 +103,10 @@ export class JobService {
 		const tests = await this.testRepository
 			.createQueryBuilder('test')
 			.leftJoinAndSelect('test.job', 'job')
+			.leftJoinAndSelect('test.questionSet', 'questionSet')
 			.where('job.id IN (:...jobIds)', { jobIds })
 			.getMany();
 
-		// Get all question IDs from tests
-		const allQuestionIds = tests.flatMap(t => t.questionSet || []).filter(id => id);
-
-		// Get all questions (without correct answers)
-		let questionsMap = new Map<string, any>();
-		if (allQuestionIds.length > 0) {
-			const questions = await this.questionRepository
-				.createQueryBuilder('question')
-				.where('question.id IN (:...questionIds)', { questionIds: allQuestionIds })
-				.getMany();
-
-			questionsMap = new Map(questions.map(q => [q.id, {
-				id: q.id,
-				questionText: q.questionText,
-				options: q.options,
-				// correctAnswer is NOT included for security
-			}]));
-		}
 
 		// Create maps for forms and tests
 		const formMap = new Map(forms.map(f => [f.job?.id, f]));
@@ -136,7 +119,12 @@ export class JobService {
 
 			let testWithQuestions: any = null;
 			if (test) {
-				const questions = (test.questionSet || []).map(qId => questionsMap.get(qId)).filter(q => q);
+				const questions = (test.questionSet || []).map(q => ({
+					id: q.id,
+					questionText: q.questionText,
+					options: q.options,
+					// correctAnswer is NOT included for security
+				}));
 				testWithQuestions = {
 					id: test.id,
 					title: test.title,

@@ -94,21 +94,19 @@ export class ApplicationService {
       const test = await this.testRepository
         .createQueryBuilder('test')
         .leftJoinAndSelect('test.job', 'job')
+        .leftJoinAndSelect('test.questionSet', 'questionSet')
         .where('job.id = :jobId', { jobId: dto.jobId })
         .getOne();
 
-      if (test && test.questionSet.length > 0) {
+      if (test && test.questionSet && test.questionSet.length > 0) {
         totalQuestions = test.questionSet.length;
         testAnswered = true;
 
         for (const answer of dto.testAnswers) {
-          const question = await this.questionRepository.findOne({
-            where: { id: answer.questionId },
-          });
-
+          const question = test.questionSet.find(q => q.id === answer.questionId);
           if (question) {
             const isCorrect = question.correctAnswer === answer.answer;
-            
+
             answerDetails.push({
               questionId: answer.questionId,
               userAnswer: answer.answer,
@@ -266,7 +264,10 @@ export class ApplicationService {
   }
 
   async getQuestionsByTestId(testId: string): Promise<any[]> {
-    const test = await this.testRepository.findOne({ where: { id: testId } });
+    const test = await this.testRepository.findOne({
+      where: { id: testId },
+      relations: ['questionSet'],
+    });
 
     if (!test) {
       throw new NotFoundException('Test not found');
@@ -276,13 +277,8 @@ export class ApplicationService {
       return [];
     }
 
-    const questions = await this.questionRepository
-      .createQueryBuilder('question')
-      .where('question.id IN (:...questionIds)', { questionIds: test.questionSet })
-      .getMany();
-
     // Return questions without correct answer for users
-    return questions.map(q => ({
+    return test.questionSet.map(q => ({
       id: q.id,
       questionText: q.questionText,
       options: q.options,
@@ -317,6 +313,7 @@ export class ApplicationService {
     const test = await this.testRepository
       .createQueryBuilder('test')
       .leftJoinAndSelect('test.job', 'job')
+      .leftJoinAndSelect('test.questionSet', 'questionSet')
       .where('job.id = :jobId', { jobId: application.job?.id })
       .getOne();
 
@@ -324,14 +321,18 @@ export class ApplicationService {
       throw new NotFoundException('Test not found for this job');
     }
 
-    // Check if test was already answered
-    if (application.testAnswered) {
-      throw new ConflictException('You have already submitted answers for this test');
+    // Check if test was already answered and answers exist
+    // Check if any submitted question has already been answered
+    const alreadyAnsweredIds = [
+      ...(Array.isArray(application.correctedanswers) ? application.correctedanswers : []),
+      ...(Array.isArray(application.incorrectanswers) ? application.incorrectanswers : [])
+    ];
+    const duplicate = testAnswers.find(ans => alreadyAnsweredIds.includes(ans.questionId));
+    if (duplicate) {
+      throw new ConflictException(`Question ${duplicate.questionId} has already been answered`);
     }
 
-    const correctedAnswerIds: string[] = [];
-    const incorrectAnswerIds: string[] = [];
-    const answerDetails: AnswerRecord[] = [];
+    
 
     for (const answer of testAnswers) {
       // Check if this question was already answered
@@ -342,14 +343,12 @@ export class ApplicationService {
         throw new ConflictException(`Question ${answer.questionId} has already been answered`);
       }
 
-      const question = await this.questionRepository.findOne({
-        where: { id: answer.questionId },
-      });
+      const question = test.questionSet.find(q => q.id === answer.questionId);
 
       if (question) {
         const isCorrect = question.correctAnswer === answer.answer;
 
-        answerDetails.push({
+        application.answerDetails.push({
           questionId: answer.questionId,
           userAnswer: answer.answer,
           correctAnswer: question.correctAnswer,
@@ -357,16 +356,14 @@ export class ApplicationService {
         });
 
         if (isCorrect) {
-          correctedAnswerIds.push(answer.questionId);
+          application.correctedanswers.push(answer.questionId);
         } else {
-          incorrectAnswerIds.push(answer.questionId);
+          application.incorrectanswers.push(answer.questionId);
         }
       }
     }
 
-    application.correctedanswers = correctedAnswerIds;
-    application.incorrectanswers = incorrectAnswerIds;
-    application.answerDetails = answerDetails;
+   
     application.totalquestions = test.questionSet.length;
     application.testAnswered = true;
 

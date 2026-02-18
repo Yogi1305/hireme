@@ -60,7 +60,7 @@ export class TestService {
     const test = this.testRepository.create({
       title: dto.title,
       description: dto.description,
-      questionSet: [],
+      questionSet: [], // Will be populated by adding questions
       job,
     });
 
@@ -80,7 +80,7 @@ export class TestService {
       throw new UnauthorizedException('Company ID not found in token');
     }
 
-    if (auth.role !== Role.Interviewer) {
+    if (auth.role !== Role.Interviewer && auth.role !== Role.ADMIN) {
       throw new ForbiddenException('Only interviewer can add question');
     }
 
@@ -107,15 +107,18 @@ export class TestService {
       questionText: dto.questionText,
       options: dto.options,
       correctAnswer: dto.correctAnswer,
+      test: test,
     });
 
     const savedQuestion = await this.questionRepository.save(question);
 
-    const questionSet = Array.isArray(test.questionSet) ? test.questionSet : [];
-    test.questionSet = [...questionSet, savedQuestion.id];
-    const updatedTest = await this.testRepository.save(test);
+    // No need to manually update questionSet, relation is managed by ORM
+    const updatedTest = await this.testRepository.findOne({
+      where: { id: test.id },
+      relations: ['questionSet'],
+    });
 
-    return { test: updatedTest, question: savedQuestion };
+    return { test: updatedTest!, question: savedQuestion };
   }
 
   async getTestByJobId(jobId: string, auth: { role?: string; companyId?: string }): Promise<Test> {

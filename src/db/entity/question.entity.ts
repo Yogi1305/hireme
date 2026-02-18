@@ -1,5 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { BaseTimestampEntity } from './base.entity';
+import { Test } from './test.entity';
+import { QuestionSet } from './questionset.entity';
 
 @Entity ({ name: 'questions' })
 export class Question extends BaseTimestampEntity {
@@ -11,4 +13,10 @@ export class Question extends BaseTimestampEntity {
     options: string[];
     @Column()
     correctAnswer: string;
+
+    @ManyToOne(() => Test, (test) => test.questionSet, { onDelete: 'CASCADE' })
+    test: Test;
+
+    @ManyToOne(() => QuestionSet, (questionSet) => questionSet.questions, { onDelete: 'CASCADE', nullable: true })
+    questionSet: QuestionSet;
 }
