@@ -15,10 +15,11 @@ export class JobMigration implements MigrationInterface {
 					{ name: "companyId", type: "uuid" },
 					{ name: "jobType", type: "varchar" },
 					{ name: "jobCategory", type: "varchar" },
-					{ name: "duration", type: "varchar" },
-					{ name: "lastDateToApply", type: "timestamp" },
-					{ name: "createdAt", type: "timestamp" },
-					{ name: "updatedAt", type: "timestamp" },
+					  { name: "duration", type: "varchar" },
+					  { name: "lastDateToApply", type: "timestamp" },
+					  { name: "isPublic", type: "boolean", default: false },
+					  { name: "createdAt", type: "timestamp" },
+					  { name: "updatedAt", type: "timestamp" },
 				],
 				foreignKeys: [
 					{

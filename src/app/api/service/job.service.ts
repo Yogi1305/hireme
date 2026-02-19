@@ -64,7 +64,7 @@ export class JobService {
 	}
 
 	async getAllJobs(auth:any): Promise<Job[]> {
-		console.log('Getting all jobs with auth:', auth);
+		// console.log('Getting all jobs with auth:', auth);
 		return this.jobRepository.find({ relations: ['company'] });
 	}
 
@@ -168,5 +168,20 @@ export class JobService {
 			website: company.website,
 			jobs: jobsByCompany.get(company.id) || [],
 		}));
+	}
+
+	async makeJobPublic(jobId: string, auth: { companyId?: string }): Promise<Job> {
+		if (!auth?.companyId) {
+			throw new UnauthorizedException('Company ID not found in token');
+		}
+		const job = await this.jobRepository.findOne({ where: { id: jobId }, relations: ['company'] });
+		if (!job) {
+			throw new NotFoundException('Job not found');
+		}
+		if (job.company?.id !== auth.companyId) {
+			throw new ForbiddenException('You can only update your own company jobs');
+		}
+		job.isPublic = true;
+		return this.jobRepository.save(job);
 	}
 }

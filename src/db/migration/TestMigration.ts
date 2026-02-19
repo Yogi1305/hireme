@@ -11,7 +11,6 @@ export class TestMigration implements MigrationInterface {
 					{ name: "title", type: "varchar" },
 					{ name: "description", type: "varchar" },
 					{ name: "jobId", type: "uuid" },
-					{ name: "questionSet", type: "simple-array", default: "''" },
 					{ name: "createdAt", type: "timestamp" },
 					{ name: "updatedAt", type: "timestamp" },
 				],

@@ -37,6 +37,9 @@ export class Job extends BaseTimestampEntity {
   @Column()
   lastDateToApply: Date;
 
+  @Column({ default: false })
+  isPublic: boolean;
+
   @OneToOne(() => Test, (test) => test.job, { cascade: true })
   @JoinColumn({ name: 'testId' })
   test: Test;

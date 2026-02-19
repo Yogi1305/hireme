@@ -73,4 +73,18 @@ export class QuestionService {
 
     return { test: updatedTest!, question: savedQuestion };
   }
+
+  // Relate an existing question to a test
+  async addExistingQuestionToTest(questionId: string, testId: string): Promise<Question> {
+    const question = await this.questionRepository.findOne({ where: { id: questionId } });
+    if (!question) {
+      throw new NotFoundException('Question not found');
+    }
+    const test = await this.testRepository.findOne({ where: { id: testId } });
+    if (!test) {
+      throw new NotFoundException('Test not found');
+    }
+    question.test = test;
+    return this.questionRepository.save(question);
+  }
 }

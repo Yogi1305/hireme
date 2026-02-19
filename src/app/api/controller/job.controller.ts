@@ -39,4 +39,16 @@ export class JobController {
 		const data = await this.jobService.getAllCompaniesWithJobs();
 		return { message: 'Companies and jobs retrieved successfully', data };
 	}
+
+	@UseGuards(JwtAuthGuard, HrCompanyGuard)
+	@Post(':jobId/public')
+	async makeJobPublic(@Req() req: Request) {
+		const jobIdParam = req.params.jobId;
+		const jobId = Array.isArray(jobIdParam) ? jobIdParam[0] : jobIdParam;
+		const auth = {
+			companyId: (req as any).user?.companyId as string | undefined,
+		};
+		const job = await this.jobService.makeJobPublic(jobId, auth);
+		return { message: 'Job made public successfully', data: job };
+	}
 }

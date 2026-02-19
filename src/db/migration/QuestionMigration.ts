@@ -11,8 +11,24 @@ export class QuestionMigration implements MigrationInterface {
 					{ name: "questionText", type: "varchar" },
 					{ name: "options", type: "simple-array" },
 					{ name: "correctAnswer", type: "varchar" },
+					{ name: "testId", type: "uuid", isNullable: true },
+					{ name: "questionSetId", type: "uuid", isNullable: true },
 					{ name: "createdAt", type: "timestamp" },
 					{ name: "updatedAt", type: "timestamp" },
+				],
+				foreignKeys: [
+					{
+						columnNames: ["testId"],
+						referencedTableName: "tests",
+						referencedColumnNames: ["id"],
+						onDelete: "CASCADE",
+					},
+					{
+						columnNames: ["questionSetId"],
+						referencedTableName: "question_sets",
+						referencedColumnNames: ["id"],
+						onDelete: "CASCADE",
+					},
 				],
 			})
 		);

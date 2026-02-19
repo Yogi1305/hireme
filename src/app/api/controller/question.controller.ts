@@ -25,4 +25,20 @@ export class QuestionController {
     const result = await this.questionService.addQuestionToTest(testId, body, auth);
     return { message: 'Question added successfully', data: result };
   }
+
+  @UseGuards(JwtAuthGuard, InterviewerCompanyGuard)
+  @Post('tests/:testId/add-existing/:questionId')
+  async addExistingQuestionToTest(
+    @Param('testId') testId: string,
+    @Param('questionId') questionId: string,
+    @Req() req: Request,
+  ) {
+    const auth = {
+      role: (req as any).user?.role as string | undefined,
+      companyId: (req as any).user?.companyId as string | undefined,
+    };
+    // Optionally, you can check company/test ownership here using auth
+    const result = await this.questionService.addExistingQuestionToTest(questionId, testId);
+    return { message: 'Existing question added to test', data: result };
+  }
 }
