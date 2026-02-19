@@ -18,7 +18,7 @@ export class QuestionSetService {
     const questionSet = this.questionSetRepository.create({ setName });
     return this.questionSetRepository.save(questionSet);
   }
-
+  
   async addQuestionToSet(questionSetId: string, questionData: Partial<Question>): Promise<Question> {
     const questionSet = await this.questionSetRepository.findOne({ where: { id: questionSetId } });
     if (!questionSet) throw new NotFoundException('Question set not found');
