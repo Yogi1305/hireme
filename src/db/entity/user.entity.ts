@@ -3,12 +3,14 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToOne,
+  Index,
 } from 'typeorm';
 import { Role } from '../libs/Role';
 import { BaseTimestampEntity } from './base.entity';
 import { Profile } from './profile.entity';
 
 @Entity({ name: 'users' })
+@Index(['email'])
 export class User extends BaseTimestampEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id: string;
