@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import is from 'zod/v4/locales/is.js';
 
 export const JobDto = z.object({
   id: z.string().uuid().optional(),
@@ -11,6 +12,7 @@ export const JobDto = z.object({
   jobCategory: z.enum(['fulltime', 'parttime', 'contract', 'intern']),
   duration: z.string(),
   lastDateToApply: z.coerce.date(),
+  isPublic: z.boolean().default(false),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   testId: z.string().uuid().optional(),

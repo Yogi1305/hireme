@@ -57,6 +57,7 @@ export class JobService {
 			jobCategory: dto.jobCategory,
 			duration: dto.duration,
 			lastDateToApply: dto.lastDateToApply,
+			isPublic: false, // New jobs are private by default
 			company,
 		});
 
