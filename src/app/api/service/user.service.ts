@@ -11,6 +11,11 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
+    async deleteUser(userId: string): Promise<void> {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) throw new NotFoundException('User not found');
+      await this.userRepository.delete(userId);
+    }
   @InjectRepository(User)
   private readonly userRepository: Repository<User>;
 
@@ -126,7 +131,7 @@ export class UserService {
       throw new UnauthorizedException('Invalid user');
     }
 
-    const applications = await this.applicationRepository
+    return this.applicationRepository
       .createQueryBuilder('application')
       .leftJoinAndSelect('application.job', 'job')
       .leftJoinAndSelect('job.company', 'company')
@@ -157,7 +162,5 @@ export class UserService {
       ])
       .orderBy('application.createdAt', 'DESC')
       .getMany();
-
-    return applications;
   }
 }

@@ -14,6 +14,18 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class QuestionService {
+    async deleteQuestion(questionId: string): Promise<void> {
+      const question = await this.questionRepository.findOne({ where: { id: questionId } });
+      if (!question) throw new NotFoundException('Question not found');
+      await this.questionRepository.delete(questionId);
+    }
+
+    async updateQuestion(questionId: string, dto: Partial<Question>): Promise<Question> {
+      const question = await this.questionRepository.findOne({ where: { id: questionId } });
+      if (!question) throw new NotFoundException('Question not found');
+      Object.assign(question, dto);
+      return this.questionRepository.save(question);
+    }
   @InjectRepository(Question)
   private readonly questionRepository: Repository<Question>;
 

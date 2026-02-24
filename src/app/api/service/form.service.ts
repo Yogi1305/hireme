@@ -93,4 +93,27 @@ export class FormService {
 
     return forms;
   }
+
+  async updateForm(formId: string, dto: Partial<CreateFormDtoType>, auth: { role?: string; companyId?: string }): Promise<Form> {
+    const form = await this.formRepository.findOne({ where: { id: formId }, relations: ['job', 'job.company'] });
+    if (!form) {
+      throw new NotFoundException('Form not found');
+    }
+    if (form.job?.company?.id !== auth.companyId) {
+      throw new ForbiddenException('You can only update forms for your company jobs');
+    }
+    Object.assign(form, dto);
+    return this.formRepository.save(form);
+  }
+
+  async deleteForm(formId: string, auth: { role?: string; companyId?: string }): Promise<void> {
+    const form = await this.formRepository.findOne({ where: { id: formId }, relations: ['job', 'job.company'] });
+    if (!form) {
+      throw new NotFoundException('Form not found');
+    }
+    if (form.job?.company?.id !== auth.companyId) {
+      throw new ForbiddenException('You can only delete forms for your company jobs');
+    }
+    await this.formRepository.delete(formId);
+  }
 }

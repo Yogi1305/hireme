@@ -14,6 +14,12 @@ import { Application } from 'src/db/entity/application.entity';
 
 @Injectable()
 export class CompanyOwnerService {
+
+        async deleteCompany(companyId: string): Promise<void> {
+            const company = await this.companyRepository.findOne({ where: { id: companyId } });
+            if (!company) throw new NotFoundException('Company not found');
+            await this.companyRepository.delete(companyId);
+        }
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>;
 

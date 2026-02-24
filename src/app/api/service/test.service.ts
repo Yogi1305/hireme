@@ -10,6 +10,18 @@ import type { AddQuestionToTestDtoType, CreateTestDtoType } from 'src/app/zod/te
 
 @Injectable()
 export class TestService {
+    async deleteTest(testId: string): Promise<void> {
+      const test = await this.testRepository.findOne({ where: { id: testId } });
+      if (!test) throw new NotFoundException('Test not found');
+      await this.testRepository.delete(testId);
+    }
+
+    async updateTest(testId: string, dto: Partial<Test>): Promise<Test> {
+      const test = await this.testRepository.findOne({ where: { id: testId } });
+      if (!test) throw new NotFoundException('Test not found');
+      Object.assign(test, dto);
+      return this.testRepository.save(test);
+    }
   @InjectRepository(Test)
   private readonly testRepository: Repository<Test>;
 

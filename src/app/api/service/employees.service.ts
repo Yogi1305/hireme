@@ -10,6 +10,12 @@ import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class EmployeesService {
+
+        async deleteEmployee(employeeId: string): Promise<void> {
+            const employee = await this.employeeRepository.findOne({ where: { id: employeeId } });
+            if (!employee) throw new NotFoundException('Employee not found');
+            await this.employeeRepository.delete(employeeId);
+        }
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>;
 
