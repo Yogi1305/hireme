@@ -1,4 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { getPagination } from '../util/pagination.util';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Job } from 'src/db/entity/jobs.entity';
@@ -57,20 +58,23 @@ export class JobService {
 			jobCategory: dto.jobCategory,
 			duration: dto.duration,
 			lastDateToApply: dto.lastDateToApply,
+			isPublic: false, // New jobs are private by default
 			company,
 		});
 
 		return this.jobRepository.save(job);
 	}
 
-	async getAllJobs(auth:any): Promise<Job[]> {
+	async getAllJobs(auth: any, page: number = 1, limit: number = 10): Promise<Job[]> {
 		// console.log('Getting all jobs with auth:', auth);
-		return this.jobRepository.find({ relations: ['company'] });
+		const { skip, take } = getPagination(page, limit);
+		return this.jobRepository.find({ relations: ['company'], skip, take });
 	}
 
 	// Public endpoint - Get all companies with their jobs, forms, tests, questions
-	async getAllCompaniesWithJobs(): Promise<any[]> {
+	async getAllCompaniesWithJobs(page:number=1,limit:number=1): Promise<any[]> {
 		// Get all companies
+		const {skip, take} = getPagination(page,limit); // Get first 10 companies for now
 		const companies = await this.companyRepository.find();
 
 		// Get all jobs

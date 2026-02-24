@@ -29,14 +29,17 @@ export class JobController {
 			companyId: (req as any).user?.companyId as string | undefined,
 			Companycode: (req as any).user?.Companycode as string | undefined,
 		};
-		//  console.log('Getting all jobs with auth:', auth);
-		const jobs = await this.jobService.getAllJobs(auth);
+		const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+		const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+		const jobs = await this.jobService.getAllJobs(auth, page, limit);
 		return { message: 'Jobs retrieved successfully', data: jobs };
 	}
 
 	@Get('browse')
-	async browseAllCompaniesWithJobs() {
-		const data = await this.jobService.getAllCompaniesWithJobs();
+	async browseAllCompaniesWithJobs(@Req() req: Request) {
+		const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+		const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+		const data = await this.jobService.getAllCompaniesWithJobs(page, limit);
 		return { message: 'Companies and jobs retrieved successfully', data };
 	}
 
