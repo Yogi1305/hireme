@@ -15,6 +15,7 @@ export class UserController {
         private readonly service: Service,
         private readonly userService: UserService
     ) {}
+    
     @Post("create")
     async createUser(@Body() user: CreateUserDtoType) {
         return this.userService.registerUser(user);
