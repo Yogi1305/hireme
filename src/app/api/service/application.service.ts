@@ -58,6 +58,15 @@ export class ApplicationService {
     if (!job) {
       throw new NotFoundException('Job not found');
     }
+    // Check if job is public
+    if (!job.isPublic) {
+      throw new ForbiddenException('Job is not public');
+    }
+    // Check if current date is before lastDateToApply
+    const now = new Date();
+    if (job.lastDateToApply && now > job.lastDateToApply) {
+      throw new ConflictException('Job application period has ended');
+    }
 
     // Check if user already applied
     const existingApplication = await this.applicationRepository
@@ -71,6 +80,7 @@ export class ApplicationService {
     if (existingApplication) {
       throw new ConflictException('You have already applied for this job');
     }
+    
 
     // Get form for this job
     const form = await this.formRepository
