@@ -65,7 +65,7 @@ export class UserController {
         return this.userService.updateProfile(userId, profileData);
     }
 
-    @UseGuards(JwtAuthGuard)
+   
     @Get("service")
     getUserService() {
         return this.service.test(); ;
