@@ -143,4 +143,19 @@ export class JobService {
 		job.isPublic = true;
 		return job.save();
 	}
+
+	async deleteJob(jobId: string, auth: { companyId?: string }): Promise<void> {
+		if (!auth?.companyId) {
+			throw new UnauthorizedException('Company ID not found in token');
+		}
+		const job = await Job.findOne({ where: { id: jobId }, relations: ['company'] });
+		if (!job) {
+			throw new NotFoundException('Job not found');
+		}
+		if (job.company?.id !== auth.companyId) {
+			throw new ForbiddenException('You can only delete your own company jobs');
+		}
+		await job.remove();
+		
+	}
 }

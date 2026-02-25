@@ -111,7 +111,7 @@ export class UserService {
     return Application.find({
       where: { user: { id: userId } },
       relations: ['job', 'job.company', 'form'],
-      order: { createdAt: 'desc' }, // Use lowercase 'desc' for FindOptionsOrder
+      order: { createdAt: 'DESC' },
     });
   }
 }

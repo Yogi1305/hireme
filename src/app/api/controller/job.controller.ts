@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from 'src/app/guard/jwt.auth';
 import { HrCompanyGuard } from 'src/app/guard/hr-company.guard';
@@ -54,4 +54,16 @@ export class JobController {
 		const job = await this.jobService.makeJobPublic(jobId, auth);
 		return { message: 'Job made public successfully', data: job };
 	}
+
+	@UseGuards(JwtAuthGuard)
+	@Delete(':jobId')
+	async deleteJob(@Req() req: Request) {
+		const jobIdParam = req.params.jobId;
+		const jobId = Array.isArray(jobIdParam) ? jobIdParam[0] : jobIdParam;
+		const auth = {
+			companyId: (req as any).user?.companyId as string | undefined,
+		};
+		await this.jobService.deleteJob(jobId, auth);
+		return { message: 'Job deleted successfully' };
+	}	
 }
