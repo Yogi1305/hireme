@@ -5,6 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
+  BaseEntity,
 } from 'typeorm';
 import { Company } from './company.entity';
 import { Role } from '../libs/Role';
@@ -14,7 +15,7 @@ import { BaseTimestampEntity } from './base.entity';
 @Index(['email'])
 @Index(['company'])
 
-export class Employee extends BaseTimestampEntity {
+export class Employee extends BaseEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id: string;
 

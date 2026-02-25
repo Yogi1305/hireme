@@ -1,7 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { Repository } from 'typeorm';
 import { Employee } from 'src/db/entity/employee.entity';
 import { Company } from 'src/db/entity/company.entity';
 import { Role } from 'src/db/libs/Role';
@@ -12,15 +10,10 @@ import * as bcrypt from 'bcryptjs';
 export class EmployeesService {
 
         async deleteEmployee(employeeId: string): Promise<void> {
-            const employee = await this.employeeRepository.findOne({ where: { id: employeeId } });
+            const employee = await Employee.findOne({ select: ['id'], where: { id: employeeId } });
             if (!employee) throw new NotFoundException('Employee not found');
-            await this.employeeRepository.delete(employeeId);
+            await employee.remove();
         }
-    @InjectRepository(Employee)
-    private readonly employeeRepository: Repository<Employee>;
-
-    @InjectRepository(Company)
-    private readonly companyRepository: Repository<Company>;
 
     constructor(private readonly jwtService: JwtService) {}
 
@@ -28,29 +21,19 @@ export class EmployeesService {
         if (!dto) {
             throw new BadRequestException('Request body is required');
         }
-
-        const existingEmployee = await this.employeeRepository.findOne({
-            where: { email: dto.email },
-        });
-
+        const existingEmployee = await Employee.findOne({ where: { email: dto.email } });
         if (existingEmployee) {
             throw new ConflictException('Employee email already registered');
         }
-
         let company: Company | null = null;
         if (dto.companyCode) {
-            company = await this.companyRepository.findOne({
-                where: { companyCode: dto.companyCode.toUpperCase() },
-            });
-
+            company = await Company.findOne({ where: { companyCode: dto.companyCode.toUpperCase() } });
             if (!company) {
                 throw new NotFoundException('Company not found for provided company code');
             }
         }
-
         const hashedPassword = await bcrypt.hash(dto.password, 10);
-
-        const employee = this.employeeRepository.create({
+        const employee = Employee.create({
             name: dto.name,
             email: dto.email,
             phone: dto.phone,
@@ -59,8 +42,7 @@ export class EmployeesService {
             companyCode: dto.companyCode?.toUpperCase() ?? null,
             company: company ?? undefined,
         });
-
-        const savedEmployee = await this.employeeRepository.save(employee);
+        const savedEmployee = await employee.save();
         const safeEmployee = { ...savedEmployee } as Partial<Employee>;
         delete safeEmployee.password;
         return safeEmployee as Omit<Employee, 'password'>;
@@ -72,21 +54,17 @@ export class EmployeesService {
         if (!data || !data.email || !data.password) {
             throw new BadRequestException('Email and password are required');
         }
-
-        const employee = await this.employeeRepository.findOne({
+        const employee = await Employee.findOne({
             where: { email: data.email },
             relations: ['company'],
         });
-
         if (!employee || !employee.password) {
             throw new UnauthorizedException('Invalid credentials');
         }
-
         const isMatch = await bcrypt.compare(data.password, employee.password);
         if (!isMatch) {
             throw new UnauthorizedException('Invalid credentials');
         }
-
         const payload = {
             id: employee.id,
             role: employee.role,
@@ -94,10 +72,8 @@ export class EmployeesService {
             companyId: employee.company?.id ?? null,
         };
         const access_token = this.jwtService.sign(payload);
-
         const safeEmployee = { ...employee } as Partial<Employee>;
         delete safeEmployee.password;
-
         return {
             access_token,
             employee: safeEmployee as Omit<Employee, 'password'>,
@@ -111,14 +87,11 @@ export class EmployeesService {
         if (!companyId) {
             throw new UnauthorizedException('Company ID not found in token');
         }
-
-        const company = await this.companyRepository.findOne({ where: { id: companyId } });
+        const company = await Company.findOne({ where: { id: companyId } });
         if (!company) {
             throw new NotFoundException('Company not found');
         }
-
-        const employees = await this.employeeRepository
-            .createQueryBuilder('employee')
+        const employees = await Employee.createQueryBuilder('employee')
             .leftJoin('employee.company', 'company')
             .where('company.id = :companyId', { companyId })
             .select([
@@ -131,7 +104,6 @@ export class EmployeesService {
                 'employee.createdAt',
             ])
             .getMany();
-
         return employees;
     }
 
@@ -139,12 +111,10 @@ export class EmployeesService {
         if (!companyCode) {
             throw new UnauthorizedException('Company code not found in token');
         }
-
-        const employees = await this.employeeRepository.find({
+        const employees = await Employee.find({
             where: { companyCode: companyCode.toUpperCase() },
             relations: ['company'],
         });
-
         return employees.map((employee) => {
             const safeEmployee = { ...employee } as Partial<Employee>;
             delete safeEmployee.password;

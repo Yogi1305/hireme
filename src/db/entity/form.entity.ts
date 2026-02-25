@@ -1,9 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, BaseEntity } from 'typeorm';
 import { Job } from './jobs.entity';
 import { BaseTimestampEntity } from './base.entity';
 
 @Entity({ name: 'form' })
-export class Form extends BaseTimestampEntity {
+export class Form extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

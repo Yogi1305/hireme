@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne, Index } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne, Index, BaseEntity } from 'typeorm';
 import { Company } from './company.entity';
 import { jobcategory, jobmode } from '../libs/Role';
 import { Test } from './test.entity';
@@ -10,7 +10,7 @@ import { BaseTimestampEntity } from './base.entity';
 @Index(['company'])
 
 @Index(['lastDateToApply'])
-export class Job extends BaseTimestampEntity {
+export class Job extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
