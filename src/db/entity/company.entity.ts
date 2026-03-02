@@ -4,6 +4,7 @@ import {
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
+  BaseEntity,
 } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { BaseTimestampEntity } from './base.entity';
@@ -11,7 +12,7 @@ import { Employee } from './employee.entity';
 import { Role } from '../libs/Role';
 
 @Entity({ name: 'companies' })
-export class Company extends BaseTimestampEntity {
+export class Company extends BaseEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id: string;
 

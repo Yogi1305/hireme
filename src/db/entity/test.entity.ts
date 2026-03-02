@@ -1,10 +1,10 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn, JoinColumn, OneToMany } from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn, JoinColumn, OneToMany, BaseEntity } from 'typeorm';
 import { Job } from './jobs.entity';
 import { BaseTimestampEntity } from './base.entity';
 import { Question } from './question.entity';
 
 @Entity({ name: 'tests' })
-export class Test extends BaseTimestampEntity {
+export class Test extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

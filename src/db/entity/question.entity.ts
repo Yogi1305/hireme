@@ -1,10 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, BaseEntity } from 'typeorm';
 import { BaseTimestampEntity } from './base.entity';
 import { Test } from './test.entity';
 import { QuestionSet } from './questionset.entity';
 
 @Entity ({ name: 'questions' })
-export class Question extends BaseTimestampEntity {
+export class Question extends BaseEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
     @Column()

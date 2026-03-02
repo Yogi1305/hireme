@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToOne, Index, BaseEntity } from 'typeorm';
 import { Company } from './company.entity';
 import { jobcategory, jobmode } from '../libs/Role';
 import { Test } from './test.entity';
@@ -6,7 +6,11 @@ import { Form } from './form.entity';
 import { BaseTimestampEntity } from './base.entity';
 
 @Entity({ name: 'jobs' })
-export class Job extends BaseTimestampEntity {
+@Index(['title'])
+@Index(['company'])
+
+@Index(['lastDateToApply'])
+export class Job extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

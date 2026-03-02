@@ -47,11 +47,12 @@ import { InterviewerService } from './service/interviewer.service';
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL, // Use DATABASE_URL
-      ssl: { rejectUnauthorized: false }, // Required for Supabase
+      // ssl: { rejectUnauthorized: false }, // Required for Supabase
+      ssl: false,
       autoLoadEntities: true,
       synchronize: true, // dev only
       // logging: true,
-      entities: [User, Profile, QuestionSet], // Ensure all entities are included
+      entities: [User, Profile, QuestionSet,Test,Question,Form,Application,Job,Company,Employee], // Ensure all entities are included
     })
     ,
     TypeOrmModule.forFeature([

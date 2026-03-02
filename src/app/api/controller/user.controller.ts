@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Req, Res } from "@nestjs/common";
+import { Controller, Get, Post, Body, UseGuards, Req, Res, Delete } from "@nestjs/common";
 import { Service } from "../service/service.service";
 import { UserService } from "../service/user.service";
 import type { CreateUserDtoType } from '../../zod/user.dto';
@@ -15,6 +15,7 @@ export class UserController {
         private readonly service: Service,
         private readonly userService: UserService
     ) {}
+    
     @Post("create")
     async createUser(@Body() user: CreateUserDtoType) {
         return this.userService.registerUser(user);
@@ -64,7 +65,7 @@ export class UserController {
         return this.userService.updateProfile(userId, profileData);
     }
 
-    @UseGuards(JwtAuthGuard)
+   
     @Get("service")
     getUserService() {
         return this.service.test(); ;
@@ -75,5 +76,11 @@ export class UserController {
     async getUserApplications(@Req() req: Request) {
         const userId = (req as any).user?.id as string;
         return this.userService.getUserApplications(userId);
+    }
+    @UseGuards(JwtAuthGuard)
+    @Delete("delete")
+    async deleteUser(@Req() req: Request) {
+        const userId = (req as any).user?.id as string;
+        return this.userService.deleteUser(userId);
     }
 }
