@@ -37,7 +37,9 @@ import { QuestionSetController } from './controller/questionset.controller';
 import { QuestionSetService } from './service/questionset.service';
 import { InterviewerController } from './controller/interviewer.controller';
 import { InterviewerService } from './service/interviewer.service';
-
+import { UploadFileController } from './controller/uploadFile.controller';
+import { UploadFileService } from './service/uploadFile.service';
+import { SupabaseService } from './util/supabase.config';
 
 @Module({
   imports: [
@@ -47,7 +49,8 @@ import { InterviewerService } from './service/interviewer.service';
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL, // Use DATABASE_URL
-      ssl: { rejectUnauthorized: false }, // Required for Supabase
+      // ssl: { rejectUnauthorized: false }, // Required for Supabase
+      ssl: false,
       autoLoadEntities: true,
       synchronize: true, // dev only
       // logging: true,
@@ -72,8 +75,8 @@ import { InterviewerService } from './service/interviewer.service';
         }),
         
   ],
-  controllers: [UserController,CompanyOwnerController,EmployeesController, JobController, FormController, TestController, QuestionController, ApplicationController, InterviewerController, QuestionSetController],
-  providers: [Service, UserService, JwtAuthGuard,CompanyOwnerService,EmployeesService, JobService, HrCompanyGuard, FormService, TestService, InterviewerCompanyGuard, QuestionService, ApplicationService, InterviewerService, QuestionSetService],
+  controllers: [UserController,CompanyOwnerController,EmployeesController, JobController, FormController, TestController, QuestionController, ApplicationController, InterviewerController, QuestionSetController,UploadFileController],
+  providers: [Service, UserService, JwtAuthGuard,CompanyOwnerService,EmployeesService, JobService, HrCompanyGuard, FormService, TestService, InterviewerCompanyGuard, QuestionService, ApplicationService, InterviewerService, QuestionSetService,UploadFileService,SupabaseService],
   exports: [JwtModule, JwtAuthGuard],
 })
 export class ApiModule {}
