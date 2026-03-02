@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   JoinColumn,
+  BaseEntity,
 } from 'typeorm';
 import { User } from './user.entity';
 import { BaseTimestampEntity } from './base.entity';
@@ -26,7 +27,7 @@ export interface Experience {
 }
 
 @Entity({ name: 'profiles' })
-export class Profile extends BaseTimestampEntity {
+export class Profile extends BaseEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id: string;
 

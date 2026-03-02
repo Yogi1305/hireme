@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from 'src/app/guard/jwt.auth';
 import { HrCompanyGuard } from 'src/app/guard/hr-company.guard';
@@ -29,14 +29,17 @@ export class JobController {
 			companyId: (req as any).user?.companyId as string | undefined,
 			Companycode: (req as any).user?.Companycode as string | undefined,
 		};
-		//  console.log('Getting all jobs with auth:', auth);
-		const jobs = await this.jobService.getAllJobs(auth);
+		const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+		const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+		const jobs = await this.jobService.getAllJobs(auth, page, limit);
 		return { message: 'Jobs retrieved successfully', data: jobs };
 	}
 
 	@Get('browse')
-	async browseAllCompaniesWithJobs() {
-		const data = await this.jobService.getAllCompaniesWithJobs();
+	async browseAllCompaniesWithJobs(@Req() req: Request) {
+		const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+		const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+		const data = await this.jobService.getAllCompaniesWithJobs(page, limit);
 		return { message: 'Companies and jobs retrieved successfully', data };
 	}
 
@@ -51,4 +54,16 @@ export class JobController {
 		const job = await this.jobService.makeJobPublic(jobId, auth);
 		return { message: 'Job made public successfully', data: job };
 	}
+
+	@UseGuards(JwtAuthGuard)
+	@Delete(':jobId')
+	async deleteJob(@Req() req: Request) {
+		const jobIdParam = req.params.jobId;
+		const jobId = Array.isArray(jobIdParam) ? jobIdParam[0] : jobIdParam;
+		const auth = {
+			companyId: (req as any).user?.companyId as string | undefined,
+		};
+		await this.jobService.deleteJob(jobId, auth);
+		return { message: 'Job deleted successfully' };
+	}	
 }

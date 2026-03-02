@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from 'src/app/guard/jwt.auth';
 import { InterviewerCompanyGuard } from 'src/app/guard/interviewer-company.guard';
@@ -40,5 +40,12 @@ export class QuestionController {
     // Optionally, you can check company/test ownership here using auth
     const result = await this.questionService.addExistingQuestionToTest(questionId, testId);
     return { message: 'Existing question added to test', data: result };
+  }
+
+  @UseGuards(JwtAuthGuard, InterviewerCompanyGuard)
+  @Delete(':questionId')
+  async deleteQuestion(@Param('questionId') questionId: string) {
+    await this.questionService.deleteQuestion(questionId);
+    return { message: 'Question deleted successfully' };
   }
 }

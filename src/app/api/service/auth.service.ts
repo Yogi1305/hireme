@@ -4,6 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
+    // Placeholder for update and delete methods if needed in the future
+    // AuthService typically does not require update/delete for authentication logic
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
