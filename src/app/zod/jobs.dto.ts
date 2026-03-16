@@ -17,6 +17,7 @@ export const JobDto = z.object({
   updatedAt: z.coerce.date().optional(),
   testId: z.string().uuid().optional(),
   formId: z.string().uuid().optional(),
+  isPublic: z.boolean(),
 });
 
 export type JobDtoType = z.infer<typeof JobDto>;

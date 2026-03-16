@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { CompanyOwnerService } from '../service/companyowner.service';
 import type { Response } from 'express';
 import type { Request } from 'express';
@@ -69,5 +69,12 @@ export class CompanyOwnerController {
         const companyId = (req as any).user?.companyId as string | undefined;
         const jobs = await this.companyOwnerService.getAllJobsWithFormsAndTests(companyId);
         return { message: 'Jobs retrieved successfully', data: jobs };
+    }
+    @UseGuards(JwtAuthGuard)
+    @Delete('delete')
+        async deleteCompany(@Req() req: Request) {
+        const companyId = (req as any).user?.companyId as string ;
+        await this.companyOwnerService.deleteCompany(companyId);
+        return { message: 'Company deleted successfully' };
     }
 }

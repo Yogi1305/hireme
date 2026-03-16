@@ -4,7 +4,6 @@ import { Job } from './jobs.entity';
 import { Form } from './form.entity';
 import { BaseTimestampEntity } from './base.entity';
 
-/** Interface for storing answer details */
 export interface AnswerRecord {
   questionId: string;
   userAnswer: string;
@@ -34,6 +33,7 @@ export class Application extends BaseTimestampEntity {
 
   @Column({ name: 'status', default: 'pending' })
   status: string;
+ 
 
   @Column('simple-array', { name: 'correctedanswers', default: '' })
   correctedanswers: string[];

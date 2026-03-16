@@ -16,7 +16,7 @@ export class FormController {
       role: (req as any).user?.role as string | undefined,
       companyId: (req as any).user?.companyId as string | undefined,
     };
-
+    //  console.log("body",body);
     const form = await this.formService.createForm(body, auth);
     return { message: 'Form created successfully', data: form };
   }
@@ -39,5 +39,27 @@ export class FormController {
     };
     const forms = await this.formService.getAllForms(auth);
     return { message: 'Forms retrieved successfully', data: forms };
+  }
+
+  @UseGuards(JwtAuthGuard, HrCompanyGuard)
+  @Post('update')
+  async updateForm(@Body('formId') formId: string, @Body() body: Partial<CreateFormDtoType>, @Req() req: Request) {
+    const auth = {
+      role: (req as any).user?.role as string | undefined,
+      companyId: (req as any).user?.companyId as string | undefined,
+    };
+    const form = await this.formService.updateForm(formId, body, auth);
+    return { message: 'Form updated successfully', data: form };
+  }
+
+  @UseGuards(JwtAuthGuard, HrCompanyGuard)
+  @Post('delete')
+  async deleteForm(@Body('formId') formId: string, @Req() req: Request) {
+    const auth = {
+      role: (req as any).user?.role as string | undefined,
+      companyId: (req as any).user?.companyId as string | undefined,
+    };
+    await this.formService.deleteForm(formId, auth);
+    return { message: 'Form deleted successfully' };
   }
 }

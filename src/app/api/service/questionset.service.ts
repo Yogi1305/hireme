@@ -7,6 +7,11 @@ import { Question } from 'src/db/entity/question.entity';
 
 @Injectable()
 export class QuestionSetService {
+    async deleteQuestionSet(questionSetId: string): Promise<void> {
+      const set = await this.questionSetRepository.findOne({ where: { id: questionSetId } });
+      if (!set) throw new NotFoundException('Question set not found');
+      await this.questionSetRepository.delete(questionSetId);
+    }
   constructor(
     @InjectRepository(QuestionSet)
     private readonly questionSetRepository: Repository<QuestionSet>,

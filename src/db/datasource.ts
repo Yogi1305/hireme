@@ -9,9 +9,9 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USER,
   password: String(process.env.DB_PASSWORD),
   database: process.env.DB_NAME,
-   entities: [
-    __dirname + '/db/entity/*.ts', // make sure Profile.entity.ts is here
-    __dirname + '/db/entity/*.js', // after build
+  entities: [
+    'src/db/entity/*.ts',
+    'dist/db/entity/*.js',
   ],
   migrations: ['src/db/migration/*.ts'],
 });
