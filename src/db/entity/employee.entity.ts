@@ -15,7 +15,7 @@ import { BaseTimestampEntity } from './base.entity';
 @Index(['email'])
 @Index(['company'])
 
-export class Employee extends BaseEntity {
+export class Employee extends BaseTimestampEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id: string;
 

@@ -7,6 +7,7 @@ import { Test } from 'src/db/entity/test.entity';
 import { Question } from 'src/db/entity/question.entity';
 import type { CreateJobDtoType } from 'src/app/zod/jobs.dto';
 import { Role } from 'src/db/libs/Role';
+import is from 'zod/v4/locales/is.js';
 
 @Injectable()
 export class JobService {
@@ -56,6 +57,7 @@ export class JobService {
 		const companies = await Company.find();
 		const jobs = await Job.createQueryBuilder('job')
 			.leftJoinAndSelect('job.company', 'company')
+			.where('job.isPublic = :isPublic', { isPublic: true })
 			.getMany();
 		const jobIds = jobs.map(j => j.id);
 		if (jobIds.length === 0) {
@@ -66,6 +68,7 @@ export class JobService {
 				industry: c.industry,
 				website: c.website,
 				jobs: [],
+
 			}));
 		}
 		const forms = await Form.createQueryBuilder('form')
@@ -109,6 +112,7 @@ export class JobService {
 				companyId: job.company?.id,
 				form: form ? { id: form.id, form: form.form } : null,
 				test: testWithQuestions,
+				isPublic: job.isPublic,
 			};
 		});
 		const jobsByCompany = new Map<string, any[]>();
@@ -140,7 +144,7 @@ export class JobService {
 		if (job.company?.id !== auth.companyId) {
 			throw new ForbiddenException('You can only update your own company jobs');
 		}
-		job.isPublic = true;
+		job.isPublic = !job.isPublic; // Toggle public status
 		return job.save();
 	}
 
