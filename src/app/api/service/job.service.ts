@@ -4,10 +4,9 @@ import { Job } from 'src/db/entity/jobs.entity';
 import { Company } from 'src/db/entity/company.entity';
 import { Form } from 'src/db/entity/form.entity';
 import { Test } from 'src/db/entity/test.entity';
-import { Question } from 'src/db/entity/question.entity';
+import { Application } from 'src/db/entity/application.entity';
 import type { CreateJobDtoType } from 'src/app/zod/jobs.dto';
 import { Role } from 'src/db/libs/Role';
-import is from 'zod/v4/locales/is.js';
 
 @Injectable()
 export class JobService {
@@ -51,14 +50,43 @@ export class JobService {
 		return Job.find({ relations: ['company'], skip, take });
 	}
 
-	// Public endpoint - Get all companies with their jobs, forms, tests, questions
-	async getAllCompaniesWithJobs(page:number=1,limit:number=1): Promise<any[]> {
-		const {skip, take} = getPagination(page,limit);
-		const companies = await Company.find();
-		const jobs = await Job.createQueryBuilder('job')
+	// Public endpoint - Get paginated companies with public jobs.
+	// If userId is provided, hide jobs already applied by that user.
+	async getAllCompaniesWithJobs(
+		page: number = 1,
+		limit: number = 10,
+		userId?: string,
+	): Promise<any[]> {
+		const { skip, take } = getPagination(page, limit);
+		const companies = await Company.find({ skip, take });
+
+		if (companies.length === 0) {
+			return [];
+		}
+
+		let excludedJobIds: string[] = [];
+		if (userId) {
+			const appliedJobs = await Application.createQueryBuilder('application')
+				.leftJoin('application.user', 'user')
+				.leftJoin('application.job', 'job')
+				.select('job.id', 'jobId')
+				.where('user.id = :userId', { userId })
+				.getRawMany<{ jobId: string }>();
+
+			excludedJobIds = appliedJobs.map((item) => item.jobId).filter(Boolean);
+		}
+
+		const companyIds = companies.map((company) => company.id);
+		const jobsQuery = Job.createQueryBuilder('job')
 			.leftJoinAndSelect('job.company', 'company')
 			.where('job.isPublic = :isPublic', { isPublic: true })
-			.getMany();
+			.andWhere('company.id IN (:...companyIds)', { companyIds });
+
+		if (excludedJobIds.length > 0) {
+			jobsQuery.andWhere('job.id NOT IN (:...excludedJobIds)', { excludedJobIds });
+		}
+
+		const jobs = await jobsQuery.getMany();
 		const jobIds = jobs.map(j => j.id);
 		if (jobIds.length === 0) {
 			return companies.map(c => ({

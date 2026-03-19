@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
+import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from 'src/app/guard/jwt.auth';
 import { HrCompanyGuard } from 'src/app/guard/hr-company.guard';
 import type { CreateJobDtoType } from 'src/app/zod/jobs.dto';
@@ -8,7 +9,10 @@ import { Company } from 'src/db/entity/company.entity';
 
 @Controller('jobs')
 export class JobController {
-	constructor(private readonly jobService: JobService) {}
+	constructor(
+		private readonly jobService: JobService,
+		private readonly jwtService: JwtService,
+	) {}
 
 	@UseGuards(JwtAuthGuard, HrCompanyGuard)
 	@Post('create')
@@ -34,13 +38,35 @@ export class JobController {
 		const jobs = await this.jobService.getAllJobs(auth, page, limit);
 		return { message: 'Jobs retrieved successfully', data: jobs };
 	}
-
+     
 	@Get('browse')
 	async browseAllCompaniesWithJobs(@Req() req: Request) {
 		const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
 		const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
-		const data = await this.jobService.getAllCompaniesWithJobs(page, limit);
+		const userId = this.getOptionalUserId(req);
+		const data = await this.jobService.getAllCompaniesWithJobs(page, limit, userId);
 		return { message: 'Companies and jobs retrieved successfully', data };
+	}
+
+	private getOptionalUserId(req: Request): string | undefined {
+		const authHeader = req.headers['authorization'];
+		const tokenFromHeader =
+			typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+				? authHeader.split(' ')[1]
+				: undefined;
+		const tokenFromCookie = (req as any).cookies?.access_token as string | undefined;
+		const token = tokenFromHeader || tokenFromCookie;
+
+		if (!token) {
+			return undefined;
+		}
+
+		try {
+			const payload = this.jwtService.verify(token) as { id?: string };
+			return payload?.id;
+		} catch {
+			return undefined;
+		}
 	}
 
 	@UseGuards(JwtAuthGuard, HrCompanyGuard)
