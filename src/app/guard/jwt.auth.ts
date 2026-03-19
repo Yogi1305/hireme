@@ -6,23 +6,14 @@ import { Request } from 'express';
 export class JwtAuthGuard implements CanActivate {
 	constructor(private readonly jwtService: JwtService) {}
 
-	private getTokenFromCookie(cookieHeader?: string): string | null {
-		if (!cookieHeader) return null;
-		const cookies = cookieHeader.split(';');
-		for (const cookie of cookies) {
-			const [name, ...valueParts] = cookie.trim().split('=');
-			if (name === 'access_token') {
-				return decodeURIComponent(valueParts.join('='));
-			}
-		}
-		return null;
-	}
-
 	canActivate(context: ExecutionContext): boolean {
-		const request = context.switchToHttp().getRequest<Request>();
+		const request = context
+			.switchToHttp()
+			.getRequest<Request & { cookies?: Record<string, string> }>();
 		const authHeader = request.headers['authorization'];
 		const tokenFromHeader = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
-		const tokenFromCookie = this.getTokenFromCookie(request.headers['cookie']);
+		const tokenFromCookie = request.cookies?.access_token ?? null;
+		
 		const token = tokenFromHeader || tokenFromCookie;
 
 		if (!token) {

@@ -16,7 +16,7 @@ export class FormController {
       role: (req as any).user?.role as string | undefined,
       companyId: (req as any).user?.companyId as string | undefined,
     };
-
+    //  console.log("body",body);
     const form = await this.formService.createForm(body, auth);
     return { message: 'Form created successfully', data: form };
   }

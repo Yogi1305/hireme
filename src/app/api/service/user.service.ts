@@ -113,5 +113,9 @@ export class UserService {
       relations: ['job', 'job.company', 'form'],
       order: { createdAt: 'DESC' },
     });
+    // notification and email
   }
+
+  
+  
 }

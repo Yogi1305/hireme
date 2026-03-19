@@ -6,6 +6,7 @@ import { JwtAuthGuard } from "src/app/guard/jwt.auth";
 import type { Request } from 'express';
 import type { Response } from 'express';
 import { Profile } from "src/db/entity/profile.entity";
+import { success } from "zod";
 
 
 
@@ -37,8 +38,8 @@ export class UserController {
 
         res.cookie('access_token', result.access_token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            secure: true,
+            sameSite: 'none',
             maxAge: 24 * 60 * 60 * 1000,
         });
 
@@ -83,4 +84,12 @@ export class UserController {
         const userId = (req as any).user?.id as string;
         return this.userService.deleteUser(userId);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Get("check-auth")
+    async checkAuth(@Req() req: Request) {
+        const userId = (req as any).user?.id as string;
+        return { message: 'Authenticated', success: true };
+    }
+    
 }
