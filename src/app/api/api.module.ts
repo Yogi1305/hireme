@@ -12,6 +12,7 @@ import { Job } from 'src/db/entity/jobs.entity';
 import { Employee } from 'src/db/entity/employee.entity';
 import { Company } from 'src/db/entity/company.entity';
 import { Application } from 'src/db/entity/application.entity';
+import { Notification } from 'src/db/entity/notification.entity';
 import { UserController } from './controller/user.controller';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -40,6 +41,8 @@ import { InterviewerService } from './service/interviewer.service';
 import { UploadFileController } from './controller/uploadFile.controller';
 import { UploadFileService } from './service/uploadFile.service';
 import { SupabaseService } from './util/supabase.config';
+import { NotificationService } from './service/notification.service';
+import { NotificationController } from './controller/notification.controller';
 
 @Module({
   imports: [
@@ -54,7 +57,7 @@ import { SupabaseService } from './util/supabase.config';
       autoLoadEntities: true,
       synchronize: true, // dev only
       // logging: true,
-      entities: [User, Profile, QuestionSet,Test,Question,Form,Application,Job,Company,Employee], // Ensure all entities are included
+      entities: [User, Profile, QuestionSet,Test,Question,Form,Application,Job,Company,Employee,Notification], // Ensure all entities are included
     })
     ,
     TypeOrmModule.forFeature([
@@ -67,7 +70,8 @@ import { SupabaseService } from './util/supabase.config';
       Employee,
       Company,
       Application,
-      QuestionSet
+      QuestionSet,
+      Notification,
     ]),
     JwtModule.register({
           secret: process.env.JWT_SECRET || 'your_jwt_secret',
@@ -75,8 +79,8 @@ import { SupabaseService } from './util/supabase.config';
         }),
         
   ],
-  controllers: [UserController,CompanyOwnerController,EmployeesController, JobController, FormController, TestController, QuestionController, ApplicationController, InterviewerController, QuestionSetController,UploadFileController],
-  providers: [Service, UserService, JwtAuthGuard,CompanyOwnerService,EmployeesService, JobService, HrCompanyGuard, FormService, TestService, InterviewerCompanyGuard, QuestionService, ApplicationService, InterviewerService, QuestionSetService,UploadFileService,SupabaseService],
+  controllers: [UserController,CompanyOwnerController,EmployeesController, JobController, FormController, TestController, QuestionController, ApplicationController, InterviewerController, QuestionSetController,UploadFileController, NotificationController],
+  providers: [Service, UserService, JwtAuthGuard,CompanyOwnerService,EmployeesService, JobService, HrCompanyGuard, FormService, TestService, InterviewerCompanyGuard, QuestionService, ApplicationService, InterviewerService, QuestionSetService,UploadFileService,SupabaseService, NotificationService],
   exports: [JwtModule, JwtAuthGuard],
 })
 export class ApiModule {}

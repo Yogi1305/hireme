@@ -8,9 +8,11 @@ import { User } from 'src/db/entity/user.entity';
 import { Company } from 'src/db/entity/company.entity';
 import { Profile } from 'src/db/entity/profile.entity';
 import type { CreateApplicationDtoType } from 'src/app/zod/application.dto';
+import { NotificationService } from './notification.service';
 
 @Injectable()
 export class ApplicationService {
+  constructor(private readonly notificationService: NotificationService) {}
   async createApplication(
     dto: CreateApplicationDtoType,
     auth: { userId?: string },
@@ -155,6 +157,7 @@ export class ApplicationService {
       throw new UnauthorizedException('Company ID not found in token');
     }
     const application = await Application.createQueryBuilder('application')
+      .leftJoinAndSelect('application.user', 'user')
       .leftJoinAndSelect('application.job', 'job')
       .leftJoinAndSelect('job.company', 'company')
       .where('application.id = :applicationId', { applicationId })
@@ -169,7 +172,19 @@ export class ApplicationService {
     if (notes !== undefined) {
       application.notes = notes;
     }
-    return application.save();
+    const updatedApplication = await application.save();
+
+    // notify user about status change
+    if (updatedApplication.user && updatedApplication.job?.company && updatedApplication.job?.title) {
+      await this.notificationService.createStatusNotification({
+        userId: updatedApplication.user.id,
+        companyName: updatedApplication.job.company.companyName,
+        jobTitle: updatedApplication.job.title,
+        status: updatedApplication.status,
+      });
+    }
+    console.log(`Application ${applicationId} status updated to ${status} by company ${auth.companyId} interviewer for user ${updatedApplication.user?.id} and job ${updatedApplication.job?.id} - Notification sent if user and job details are available.`);
+    return updatedApplication;
   }
 
   async getApplicationById(

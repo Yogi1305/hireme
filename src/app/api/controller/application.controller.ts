@@ -4,6 +4,7 @@ import { JwtAuthGuard } from 'src/app/guard/jwt.auth';
 import { HrCompanyGuard } from 'src/app/guard/hr-company.guard';
 import type { CreateApplicationDtoType } from 'src/app/zod/application.dto';
 import { ApplicationService } from '../service/application.service';
+import { InterviewerCompanyGuard } from 'src/app/guard/interviewer-company.guard';
 
 @Controller('applications')
 export class ApplicationController {
@@ -61,7 +62,7 @@ export class ApplicationController {
     return { message: 'Application retrieved successfully', data: application };
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard,InterviewerCompanyGuard)
   @Patch(':applicationId/status')
   async updateApplicationStatus(
     @Param('applicationId') applicationId: string,

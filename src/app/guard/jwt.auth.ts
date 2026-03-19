@@ -21,12 +21,14 @@ export class JwtAuthGuard implements CanActivate {
 		}
 		try {
 			const payload = this.jwtService.verify(token);
-			if (!payload || !payload.id || !payload.role) {
+			const resolvedUserId = payload?.id ?? payload?.userId ?? payload?.sub;
+			if (!payload || !resolvedUserId || !payload.role) {
 				throw new UnauthorizedException('Invalid token payload');
 			}
 			// Attach user info to request for further use
 			(request as any).user = {
-				id: payload.id,
+				id: resolvedUserId,
+				userId: resolvedUserId,
 				role: payload.role,
 				companyCode: payload?.companyCode,
 				companyId: payload?.companyId,

@@ -2,6 +2,8 @@ import { Injectable, NotFoundException, UnauthorizedException, ForbiddenExceptio
 import { Application } from 'src/db/entity/application.entity';
 import { Job } from 'src/db/entity/jobs.entity';
 import { applicationstatus } from 'src/db/libs/Role';
+import { NotificationService } from './notification.service';
+
 
 // Allowed status values for interviewers
 const INTERVIEWER_ALLOWED_STATUS = [
@@ -12,7 +14,7 @@ const INTERVIEWER_ALLOWED_STATUS = [
 
 @Injectable()
 export class InterviewerService {
-  // No repository injection needed for Active Record
+  constructor(private readonly notificationService: NotificationService) {}
 
   /**
    * Update application status by interviewer
@@ -23,6 +25,7 @@ export class InterviewerService {
     status: string,
     auth: { companyId?: string },
   ): Promise<Application> {
+    
     if (!auth?.companyId) {
       throw new UnauthorizedException('Company ID not found in token');
     }
@@ -43,7 +46,20 @@ export class InterviewerService {
       throw new ForbiddenException('You can only update applications for your company jobs');
     }
     application.status = status;
-    return application.save();
+    const updatedApplication = await application.save();
+   
+    if (updatedApplication.user?.id && updatedApplication.job?.company?.companyName && updatedApplication.job?.title) {
+      
+      await this.notificationService.createStatusNotification({
+        userId: updatedApplication.user.id,
+        companyName: updatedApplication.job.company.companyName,
+        jobTitle: updatedApplication.job.title,
+        status: updatedApplication.status,
+      });
+    }
+    console.log(`Application ${applicationId} status updated to ${status} by company ${auth.companyId} interviewer for user ${updatedApplication.user?.id} and job ${updatedApplication.job?.id} - Notification sent if user and job details are available.`);
+
+    return updatedApplication;
   }
 
   /**

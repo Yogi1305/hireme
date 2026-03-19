@@ -16,7 +16,7 @@ export class HrCompanyGuard implements CanActivate {
       throw new UnauthorizedException('Company ID not found in token');
     }
 
-    console.log('Authenticated user:', authUser);
+    console.log('Authenticated user: hr guard run', authUser);
 
     // Allow both ADMIN (company owner) and HR to create jobs
     if (authUser.role !== Role.Hr && authUser.role !== Role.ADMIN) {
