@@ -9,10 +9,14 @@ import { Company } from 'src/db/entity/company.entity';
 import { Profile } from 'src/db/entity/profile.entity';
 import type { CreateApplicationDtoType } from 'src/app/zod/application.dto';
 import { NotificationService } from './notification.service';
+import { EmailService } from './email.service';
 
 @Injectable()
 export class ApplicationService {
-  constructor(private readonly notificationService: NotificationService) {}
+  constructor(
+    private readonly notificationService: NotificationService,
+    private readonly emailService: EmailService,
+  ) {}
   async createApplication(
     dto: CreateApplicationDtoType,
     auth: { userId?: string },
@@ -182,7 +186,29 @@ export class ApplicationService {
         jobTitle: updatedApplication.job.title,
         status: updatedApplication.status,
       });
+
+      if (updatedApplication.user.email) {
+        const statusLabel = updatedApplication.status.toUpperCase();
+        const notesHtml = notes ? `<p><strong>Notes:</strong> ${notes}</p>` : '';
+
+        try {
+          await this.emailService.sendEmail({
+            to: updatedApplication.user.email,
+            subject: `Application Update: ${updatedApplication.job.title} at ${updatedApplication.job.company.companyName}`,
+            template: `
+              <p>Hello ${updatedApplication.user.name},</p>
+              <p>Your application for <strong>${updatedApplication.job.title}</strong> at <strong>${updatedApplication.job.company.companyName}</strong> has been updated.</p>
+              <p><strong>Current status:</strong> ${statusLabel}</p>
+              ${notesHtml}
+              <p>Thank you for using HireMe.</p>
+            `,
+          });
+        } catch (err) {
+          console.error('Failed to enqueue status update email:', err);
+        }
+      }
     }
+
     console.log(`Application ${applicationId} status updated to ${status} by company ${auth.companyId} interviewer for user ${updatedApplication.user?.id} and job ${updatedApplication.job?.id} - Notification sent if user and job details are available.`);
     return updatedApplication;
   }

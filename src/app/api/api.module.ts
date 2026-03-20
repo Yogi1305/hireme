@@ -43,6 +43,8 @@ import { UploadFileService } from './service/uploadFile.service';
 import { SupabaseService } from './util/supabase.config';
 import { NotificationService } from './service/notification.service';
 import { NotificationController } from './controller/notification.controller';
+import { EmailService } from './service/email.service';
+import { EmailController } from './controller/email.controller';
 
 @Module({
   imports: [
@@ -79,8 +81,8 @@ import { NotificationController } from './controller/notification.controller';
         }),
         
   ],
-  controllers: [UserController,CompanyOwnerController,EmployeesController, JobController, FormController, TestController, QuestionController, ApplicationController, InterviewerController, QuestionSetController,UploadFileController, NotificationController],
-  providers: [Service, UserService, JwtAuthGuard,CompanyOwnerService,EmployeesService, JobService, HrCompanyGuard, FormService, TestService, InterviewerCompanyGuard, QuestionService, ApplicationService, InterviewerService, QuestionSetService,UploadFileService,SupabaseService, NotificationService],
+  controllers: [UserController,CompanyOwnerController,EmployeesController, JobController, FormController, TestController, QuestionController, ApplicationController, InterviewerController, QuestionSetController,UploadFileController, NotificationController, EmailController],
+  providers: [Service, UserService, JwtAuthGuard,CompanyOwnerService,EmployeesService, JobService, HrCompanyGuard, FormService, TestService, InterviewerCompanyGuard, QuestionService, ApplicationService, InterviewerService, QuestionSetService,UploadFileService,SupabaseService, NotificationService, EmailService],
   exports: [JwtModule, JwtAuthGuard],
 })
 export class ApiModule {}
